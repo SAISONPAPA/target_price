@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PORTFOLIO / TP TRACKER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  :root{
+    --bg: #0c1210;
+    --bg-raised: #121b17;
+    --card: #16211c;
+    --line: #24352c;
+    --trace: #1c2b23;
+    --gold: #c9a227;
+    --gold-dim: #8a7126;
+    --pcb-green: #3ea36b;
+    --pcb-green-dim: #2a6b48;
+    --blue: #4f8ef7;
+    --blue-dim: #35619b;
+    --silver: #9aa79c;
+    --ink: #e9e6da;
+    --ink-dim: #9aa79c;
+    --ink-faint: #5f6d64;
+    --up: #ef5350;
+    --down: #4f8ef7;
+    --watch: #e0a63a;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--trace) 1px, transparent 1px),
+      linear-gradient(90deg, var(--trace) 1px, transparent 1px);
+    background-size: 34px 34px;
+    color: var(--ink);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 24px 14px 60px;
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+  .wrap{ max-width: 720px; margin: 0 auto; }
+
+  header{
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    padding: 16px 18px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-bottom: 12px; position: relative;
+  }
+  header::before{
+    content:""; position:absolute; top:7px; left:7px; right:7px; bottom:7px;
+    border: 1px solid var(--gold-dim); opacity: .35; pointer-events:none;
+  }
+  .brand{ font-family: 'Space Grotesk', sans-serif; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
+  .brand b{ color: var(--gold); font-weight: 600; }
+  .summary-stats{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); text-align:right; line-height:1.6; }
+  .summary-stats b{ color: var(--ink); }
+
+  /* ---- Composition panel ---- */
+  .comp-panel{
+    border: 1px solid var(--line); background: var(--bg-raised);
+    padding: 14px 16px 16px; margin-bottom: 14px;
+  }
+  .comp-title{
+    font-family:'Space Grotesk', sans-serif; font-size: 12.5px; letter-spacing:.08em;
+    color: var(--ink-dim); text-transform: uppercase; margin-bottom: 10px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .comp-title span.note{ font-family:'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--ink-faint); text-transform:none; letter-spacing:0; }
+  .comp-tabs{ display:flex; gap: 6px; margin-bottom: 14px; }
+  .comp-tab{
+    flex:1; font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing:.03em;
+    background: transparent; color: var(--ink-faint); border: 1px solid var(--line);
+    padding: 7px 4px; cursor:pointer; text-align:center;
+  }
+  .comp-tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.06); }
+
+  .comp-bar{
+    display:flex; height: 22px; width:100%; overflow:hidden;
+    border: 1px solid var(--line); margin-bottom: 12px;
+  }
+  .comp-bar-seg{ height:100%; }
+
+  .comp-legend{ display:flex; flex-direction:column; gap: 7px; }
+  .comp-row{ display:flex; align-items:center; gap: 8px; font-family:'IBM Plex Mono', monospace; font-size: 11.5px; }
+  .comp-dot{ width:8px; height:8px; flex:none; }
+  .comp-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color: var(--ink); }
+  .comp-pct{ width: 46px; text-align:right; color: var(--ink); font-weight:600; }
+  .comp-amt{ width: 92px; text-align:right; color: var(--ink-faint); font-size: 10px; }
+
+  .toolbar{ display:flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px; }
+  .toolbar button{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:.04em;
+    background: var(--bg-raised); color: var(--ink-dim); border: 1px solid var(--line);
+    padding: 6px 10px; cursor: pointer;
+  }
+  .toolbar button:hover{ border-color: var(--gold-dim); color: var(--gold); }
+
+  .section-header{
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing:.1em;
+    color: var(--ink-faint); text-transform: uppercase;
+    margin: 18px 2px 8px; padding-bottom: 6px; border-bottom: 1px dashed var(--line);
+    display:flex; justify-content:space-between;
+  }
+  .section-header:first-of-type{ margin-top: 4px; }
+
+  .board{ display:flex; flex-direction:column; gap: 8px; }
+
+  .chip{ border: 1px solid var(--line); background: var(--card); position: relative; overflow: hidden; }
+  .chip.is-watch{ border-style: dashed; }
+  .chip::before, .chip::after{
+    content:""; position:absolute; top:0; bottom:0; width: 8px;
+    background-image: repeating-linear-gradient(to bottom, var(--gold-dim) 0 2px, transparent 2px 16px);
+    opacity:.4; pointer-events:none;
+  }
+  .chip::before{ left:0; } .chip::after{ right:0; }
+
+  .chip summary{ list-style:none; cursor:pointer; padding: 14px 16px 12px; position:relative; }
+  .chip summary::-webkit-details-marker{ display:none; }
+
+  .sum-top{ display:flex; justify-content:space-between; align-items:flex-start; gap: 10px; }
+  .sum-left{ min-width:0; }
+  .sum-name{ font-family:'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; display:flex; align-items:center; gap: 8px; flex-wrap:wrap; }
+  .sum-code{ font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-faint); font-weight:400; }
+  .sum-status{ font-family:'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing:.06em; color: var(--pcb-green); display:flex; align-items:center; gap:5px; margin-top: 4px; }
+  .sum-status.watch{ color: var(--watch); }
+  .status-dot{ width:5px; height:5px; border-radius:50%; background: var(--pcb-green); flex:none; box-shadow: 0 0 0 0 rgba(62,163,107,.6); animation: pulse 2s infinite; }
+  .sum-status.watch .status-dot{ background: var(--watch); animation: none; box-shadow:none; }
+  @keyframes pulse{ 0%{ box-shadow: 0 0 0 0 rgba(62,163,107,.5); } 70%{ box-shadow: 0 0 0 5px rgba(62,163,107,0); } 100%{ box-shadow: 0 0 0 0 rgba(62,163,107,0); } }
+
+  .sum-right{ text-align:right; flex:none; display:flex; align-items:flex-start; gap:10px; }
+  .sum-price{ font-family:'IBM Plex Mono', monospace; font-size: 17px; font-weight:600; white-space:nowrap; }
+  .sum-price .unit{ font-size: 11px; color: var(--ink-dim); font-weight:400; }
+  .sum-change{ font-family:'IBM Plex Mono', monospace; font-size: 11px; margin-top: 2px; white-space:nowrap; }
+  .chevron{ width: 9px; height: 9px; border-right: 1.5px solid var(--ink-faint); border-bottom: 1.5px solid var(--ink-faint); transform: rotate(-45deg); margin-top: 6px; transition: transform .18s ease; flex: none; }
+  .chip[open] .chevron{ transform: rotate(45deg); margin-top: 2px; }
+
+  .mini-gauge{ position:relative; height: 4px; background:#0a120e; border:1px solid var(--line); margin-top: 12px; }
+  .mini-gauge-fill{ position:absolute; top:0; left:0; bottom:0; background: linear-gradient(90deg, var(--pcb-green-dim), var(--pcb-green)); }
+  .mini-gauge-tp{ position:absolute; top:-2px; width:1px; height:8px; background: var(--gold); }
+
+  .body{ padding: 4px 16px 18px; border-top: 1px dashed var(--line); margin-top: 12px; }
+  .price-asof{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin: 10px 0 0; }
+
+  .gauge-label-row{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin: 18px 4px 8px; letter-spacing: .04em; }
+  .gauge{ position: relative; height: 6px; background: #0a120e; border: 1px solid var(--line); margin: 0 4px 46px; }
+  .gauge-fill{ position:absolute; top:0; left:0; bottom:0; background: linear-gradient(90deg, var(--pcb-green-dim), var(--pcb-green)); }
+  .gauge-marker{ position:absolute; top:-5px; width:1px; height: 16px; background: var(--ink-faint); }
+  .gauge-marker .tag{ position:absolute; top: 22px; left:50%; transform: translateX(-50%); font-family:'IBM Plex Mono', monospace; font-size: 10px; white-space: nowrap; text-align:center; }
+  .gauge-marker .tag .k{ display:block; color: var(--ink-faint); font-size: 9px; letter-spacing:.06em; }
+  .gauge-marker .tag .v{ display:block; color: var(--ink-dim); margin-top: 2px; }
+  .gauge-marker.tp .tag .k, .gauge-marker.tp .tag .v{ color: var(--gold); }
+  .gauge-pointer{ position:absolute; top:-16px; width:0; height:0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--up); transform: translateX(-5px); }
+  .gauge-pointer .tag{ position:absolute; top:-20px; left:50%; transform: translateX(-50%); font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--up); white-space:nowrap; font-weight:600; }
+
+  .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-bottom: 18px; }
+  .field .k{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); letter-spacing:.06em; margin-bottom: 4px; }
+  .field .v{ font-family:'IBM Plex Mono', monospace; font-size: 14px; color: var(--ink); }
+
+  .scenarios{ display:grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 4px; }
+  .scenario{ border: 1px solid var(--line); padding: 10px 8px; text-align:center; background: rgba(255,255,255,0.015); }
+  .scenario .k{ font-family:'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing:.08em; color: var(--ink-faint); margin-bottom:5px; }
+  .scenario .v{ font-family:'IBM Plex Mono', monospace; font-size: 13px; font-weight:600; }
+  .scenario .p{ font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--pcb-green); margin-top: 3px; }
+  .scenario.bull .v{ color: var(--gold); }
+  .scenario.bear .v{ color: var(--ink-dim); }
+
+  .bfooter{ margin-top: 14px; display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); flex-wrap: wrap; gap: 8px; }
+  .no-tp-note{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin-top: 10px; }
+
+  @media (max-width: 480px){
+    .scenarios{ grid-template-columns: 1fr; }
+    .sum-price{ font-size: 15px; }
+    .comp-amt{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand"><b>PORTFOLIO</b> / TP TRACKER</div>
+    <div class="summary-stats" id="headerStats">계산중...</div>
+  </header>
+
+  <div class="comp-panel">
+    <div class="comp-title">포트폴리오 비중 <span class="note">평가금액 기준 · 관심종목 제외 · 실시간 미반영 종목은 매입가로 임시 계산</span></div>
+    <div class="comp-tabs">
+      <button class="comp-tab active" data-view="all">전체</button>
+      <button class="comp-tab" data-view="domestic">국내(주식+ETF)</button>
+      <button class="comp-tab" data-view="overseas">해외(주식+ETF)</button>
+    </div>
+    <div class="comp-bar" id="compBar"></div>
+    <div class="comp-legend" id="compLegend"></div>
+  </div>
+
+  <div class="toolbar">
+    <button type="button" id="expandAll">모두 펼치기</button>
+    <button type="button" id="collapseAll">모두 접기</button>
+  </div>
+
+  <div id="board"></div>
+</div>
+
+<script>
+/* =========================================================
+   데이터 모델
+   - invested: 매입금액 (원화 종목은 원, 해외 종목은 USD)
+   - finalTP/bullTP/baseTP/bearTP: null이면 해당 시나리오 없음
+   - held:false + watch:true => 관심종목(미보유)
+   ========================================================= */
+const FX_RATE = 1530; // 2026.07.03 기준 대략치, 필요시 수정
+
+const STOCKS = [
+  // 국내주식 · 보유
+  { code:'000660', name:'SK하이닉스', category:'국내주식', held:true, currency:'KRW',
+    entry:1678000, shares:2, invested:3356000, finalTP:3200000, bullTP:7033691, baseTP:5311644, bearTP:4294255 },
+  { code:'003230', name:'삼양식품', category:'국내주식', held:true, currency:'KRW',
+    entry:1090000, shares:1, invested:1090000, finalTP:1600000, bullTP:2328888, baseTP:1754923, bearTP:1353975 },
+  { code:'010120', name:'LS ELECTRIC', category:'국내주식', held:true, currency:'KRW',
+    entry:238100, shares:5, invested:1190500, finalTP:320000, bullTP:413166, baseTP:301835, bearTP:203552 },
+  { code:'071050', name:'한국금융지주', category:'국내주식', held:true, currency:'KRW',
+    entry:234857, shares:7, invested:1643999, finalTP:600000, bullTP:993649, baseTP:886674, bearTP:808186 },
+  { code:'316140', name:'우리금융지주', category:'국내주식', held:true, currency:'KRW',
+    entry:33250, shares:30, invested:997500, finalTP:40000, bullTP:81243, baseTP:74947, bearTP:69068 },
+
+  // 국내주식 · 보유
+  { code:'005930', name:'삼성전자', category:'국내주식', held:true, currency:'KRW',
+    entry:290000, shares:3, invested:870000, finalTP:400000, bullTP:537358, baseTP:349001, bearTP:243589 },
+
+  // 국내주식 · 관심 (미보유)
+  { code:'003490', name:'대한항공', category:'국내주식', held:false, watch:true, currency:'KRW',
+    entry:null, shares:null, invested:null, finalTP:null, bullTP:38204, baseTP:33942, bearTP:29125 },
+  { code:'016360', name:'삼성증권', category:'국내주식', held:false, watch:true, currency:'KRW',
+    entry:null, shares:null, invested:null, finalTP:null, bullTP:300469, baseTP:269019, bearTP:241315 },
+
+  // 국내ETF · 보유
+  { code:'360750', name:'TIGER 미국S&P500', category:'국내ETF', held:true, currency:'KRW',
+    entry:25052, shares:242, invested:6062584, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+  { code:'418660', name:'TIGER 미국나스닥100레버리지', category:'국내ETF', held:true, currency:'KRW',
+    entry:49592, shares:12, invested:595104, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+  { code:'133690', name:'TIGER 미국나스닥100', category:'국내ETF', held:true, currency:'KRW',
+    entry:198766, shares:3, invested:596298, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+
+  // 해외주식 · 보유 (USD, 아직 실시간 자동연동 전)
+  { code:'GOOGL', name:'GOOGL', category:'해외주식', held:true, currency:'USD',
+    entry:228.79, shares:8, invested:1830.30, finalTP:380, bullTP:463, baseTP:320, bearTP:263 },
+  { code:'UBER', name:'UBER', category:'해외주식', held:true, currency:'USD',
+    entry:92.00, shares:43, invested:3956.00, finalTP:130, bullTP:168, baseTP:115, bearTP:86 },
+  { code:'MSFT', name:'MSFT', category:'해외주식', held:true, currency:'USD',
+    entry:453.57, shares:4, invested:1814.26, finalTP:480, bullTP:519, baseTP:360, bearTP:297 },
+  { code:'BRK.B', name:'BRK.B', category:'해외주식', held:true, currency:'USD',
+    entry:482.10, shares:2, invested:964.20, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+  { code:'XOM', name:'XOM', category:'해외주식', held:true, currency:'USD',
+    entry:136.28, shares:1, invested:136.28, finalTP:null, bullTP:150, baseTP:139, bearTP:123 },
+
+  // 해외ETF · 보유
+  { code:'DRAM', name:'DRAM (ETF)', category:'해외ETF', held:true, currency:'USD',
+    entry:51.20, shares:20, invested:1024.00, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+];
+
+const CATEGORY_ORDER = ['국내주식','국내ETF','해외주식','해외ETF'];
+const CATEGORY_LABEL = { '국내주식':'국내주식', '국내ETF':'국내ETF', '해외주식':'해외주식', '해외ETF':'해외ETF' };
+const CATEGORY_COLORS = {
+  '국내주식': ['#3ea36b','#2f8a58','#256e46','#1c5636','#153f28'],
+  '국내ETF':  ['#c9a227','#a9861f','#8a6c19'],
+  '해외주식': ['#4f8ef7','#3f74c9','#2f5a9b','#28497d','#1f3860'],
+  '해외ETF':  ['#9aa79c'],
+};
+
+function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
+function fmtUnit(stock, n){ return stock.currency === 'USD' ? ('$' + Number(n).toLocaleString('en-US', {maximumFractionDigits:2})) : (fmt(n) + '원'); }
+function investedKRW(stock){ return stock.currency === 'USD' ? stock.invested * FX_RATE : stock.invested; }
+
+let latestPriceData = null; // price.json 로드되면 채워짐
+let activeCompView = 'all';
+
+function currentPriceForStock(stock){
+  if (latestPriceData && latestPriceData.stocks && latestPriceData.stocks[stock.code]) {
+    return latestPriceData.stocks[stock.code].price;
+  }
+  return stock.entry; // 실시간 데이터 없으면 매입가로 대체
+}
+function evalKRW(stock){
+  const price = currentPriceForStock(stock);
+  const value = price * stock.shares;
+  return stock.currency === 'USD' ? value * FX_RATE : value;
+}
+
+/* ---------------- 포트폴리오 비중 (평가금액 기준) ---------------- */
+function buildComposition(view){
+  activeCompView = view;
+  let pool = STOCKS.filter(s => s.held);
+  if (view === 'domestic') pool = pool.filter(s => s.category === '국내주식' || s.category === '국내ETF');
+  if (view === 'overseas') pool = pool.filter(s => s.category === '해외주식' || s.category === '해외ETF');
+
+  const withKRW = pool.map(s => ({ stock: s, krw: evalKRW(s) }));
+  const total = withKRW.reduce((sum, x) => sum + x.krw, 0);
+  withKRW.sort((a, b) => b.krw - a.krw);
+
+  const colorCounters = {};
+  withKRW.forEach(x => {
+    const cat = x.stock.category;
+    colorCounters[cat] = (colorCounters[cat] || 0);
+    const palette = CATEGORY_COLORS[cat] || ['#9aa79c'];
+    x.color = palette[colorCounters[cat] % palette.length];
+    colorCounters[cat]++;
+    x.pct = total ? (x.krw / total) * 100 : 0;
+  });
+
+  const bar = document.getElementById('compBar');
+  const legend = document.getElementById('compLegend');
+  bar.innerHTML = withKRW.map(x =>
+    `<div class="comp-bar-seg" style="width:${x.pct}%;background:${x.color}"></div>`
+  ).join('');
+
+  legend.innerHTML = withKRW.map(x =>
+    `<div class="comp-row">
+       <div class="comp-dot" style="background:${x.color}"></div>
+       <div class="comp-name">${x.stock.name}</div>
+       <div class="comp-pct">${x.pct.toFixed(1)}%</div>
+       <div class="comp-amt">${fmt(x.krw)}원</div>
+     </div>`
+  ).join('');
+}
+
+document.querySelectorAll('.comp-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.comp-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildComposition(btn.dataset.view);
+  });
+});
+
+/* ---------------- 종목 카드 렌더링 ---------------- */
+function scenarioBox(cls, label, value, entry, currency){
+  if (value == null) return '';
+  const pct = entry ? (((value - entry) / entry) * 100).toFixed(1) : null;
+  return `<div class="scenario ${cls}">
+    <div class="k">${label}</div>
+    <div class="v">${currency === 'USD' ? '$' + value.toLocaleString('en-US') : value.toLocaleString('ko-KR')}</div>
+    ${pct !== null ? `<div class="p">${pct >= 0 ? '+' : ''}${pct}%</div>` : ''}
+  </div>`;
+}
+
+function renderCard(stock){
+  const hasTP = stock.bullTP != null;
+  const hasEntry = stock.entry != null;
+  const statusLabel = stock.watch ? '관심' : '진행중';
+  const statusClass = stock.watch ? 'watch' : '';
+  const unit = stock.currency === 'USD' ? '$' : '원';
+
+  let gaugeHTML = '';
+  let miniGaugeHTML = '';
+  if (hasTP && hasEntry){
+    gaugeHTML = `
+      <div class="gauge-label-row"><span>매입가</span><span>BULL TP</span></div>
+      <div class="gauge" data-role="gauge">
+        <div class="gauge-fill" data-role="fill" style="width:0%"></div>
+        <div class="gauge-pointer" data-role="pointer" style="left:0%"><div class="tag">현재가</div></div>
+        ${stock.finalTP != null ? `<div class="gauge-marker tp" style="left:${pos(stock, stock.finalTP)}%"><div class="tag"><span class="k">최종 TP</span><span class="v">${short(stock.finalTP, stock.currency)}</span></div></div>` : ''}
+        <div class="gauge-marker" style="left:${pos(stock, stock.bearTP)}%"><div class="tag"><span class="k">BEAR</span><span class="v">${short(stock.bearTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:${pos(stock, stock.baseTP)}%"><div class="tag"><span class="k">BASE</span><span class="v">${short(stock.baseTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:100%"><div class="tag"><span class="k">BULL</span><span class="v">${short(stock.bullTP, stock.currency)}</span></div></div>
+      </div>`;
+    miniGaugeHTML = `
+      <div class="mini-gauge">
+        <div class="mini-gauge-fill" data-role="mini-fill" style="width:0%"></div>
+        ${stock.finalTP != null ? `<div class="mini-gauge-tp" style="left:${pos(stock, stock.finalTP)}%"></div>` : ''}
+      </div>`;
+  }
+
+  const gridHTML = hasEntry ? `
+    <div class="grid">
+      <div class="field"><div class="k">매입가</div><div class="v">${fmtUnit(stock, stock.entry)}</div></div>
+      <div class="field"><div class="k">주수</div><div class="v">${stock.shares}주</div></div>
+      <div class="field"><div class="k">매입금액</div><div class="v">${fmtUnit(stock, stock.invested)}</div></div>
+      <div class="field"><div class="k">평가금액</div><div class="v" data-role="eval">${fmtUnit(stock, stock.invested)}</div></div>
+    </div>` : `<div class="no-tp-note">보유하지 않은 관심종목 — 목표주가만 참고용으로 등록됨</div>`;
+
+  const scenariosHTML = hasTP ? `
+    <div class="scenarios">
+      ${scenarioBox('bear','BEAR TP', stock.bearTP, stock.entry, stock.currency)}
+      ${scenarioBox('base','BASE TP', stock.baseTP, stock.entry, stock.currency)}
+      ${scenarioBox('bull','BULL TP', stock.bullTP, stock.entry, stock.currency)}
+    </div>` : `<div class="no-tp-note">등록된 목표주가 시나리오 없음 (ETF/현금성 보유)</div>`;
+
+  const footerHTML = (hasTP && stock.finalTP != null && hasEntry) ? `
+    <div class="bfooter">
+      <span>최종 TP ${fmtUnit(stock, stock.finalTP)} (매입가 대비 ${(((stock.finalTP - stock.entry)/stock.entry)*100).toFixed(1)}%)</span>
+      <span>${stock.shares}주 보유</span>
+    </div>` : '';
+
+  return `
+  <details class="chip ${stock.watch ? 'is-watch' : ''}" data-code="${stock.code}" data-entry="${stock.entry ?? ''}" data-bull="${stock.bullTP ?? ''}" data-currency="${stock.currency}">
+    <summary>
+      <div class="sum-top">
+        <div class="sum-left">
+          <div class="sum-name">${stock.name} <span class="sum-code">${stock.code}</span></div>
+          <div class="sum-status ${statusClass}"><span class="status-dot"></span>${statusLabel}</div>
+        </div>
+        <div class="sum-right">
+          <div>
+            <div class="sum-price"><span data-role="value">${hasEntry ? fmt(stock.entry) : '-'}</span><span class="unit">${unit}</span></div>
+            <div class="sum-change" data-role="change">${hasEntry ? '기준값' : ''}</div>
+          </div>
+          <div class="chevron"></div>
+        </div>
+      </div>
+      ${miniGaugeHTML}
+    </summary>
+    <div class="body">
+      <div class="price-asof" data-role="asof">${hasEntry ? '고정값 · 자동갱신 대기중' : ''}</div>
+      ${gaugeHTML}
+      ${gridHTML}
+      ${scenariosHTML}
+      ${footerHTML}
+    </div>
+  </details>`;
+}
+
+function pos(stock, value){
+  if (!stock.entry || !stock.bullTP) return 0;
+  const range = stock.bullTP - stock.entry;
+  if (range <= 0) return 0;
+  return Math.max(0, Math.min(100, ((value - stock.entry) / range) * 100));
+}
+function short(value, currency){
+  if (currency === 'USD') return '$' + value.toLocaleString('en-US');
+  return (value/10000).toFixed(0) + '만';
+}
+
+function renderBoard(){
+  const board = document.getElementById('board');
+  let html = '';
+  const groups = [
+    { key:'국내주식-보유', label:'국내주식 · 보유', filter: s => s.category==='국내주식' && s.held },
+    { key:'국내주식-관심', label:'국내주식 · 관심 (미보유)', filter: s => s.category==='국내주식' && !s.held },
+    { key:'국내ETF-보유', label:'국내ETF · 보유', filter: s => s.category==='국내ETF' && s.held },
+    { key:'해외주식-보유', label:'해외주식 · 보유', filter: s => s.category==='해외주식' && s.held },
+    { key:'해외ETF-보유', label:'해외ETF · 보유', filter: s => s.category==='해외ETF' && s.held },
+  ];
+  groups.forEach(g => {
+    const items = STOCKS.filter(g.filter);
+    if (items.length === 0) return;
+    html += `<div class="section-header"><span>${g.label}</span><span>${items.length}종목</span></div>`;
+    html += `<div class="board">` + items.map(renderCard).join('') + `</div>`;
+  });
+  board.innerHTML = html;
+}
+
+renderBoard();
+buildComposition('all');
+
+/* ---------------- 실시간 시세 반영 (국내 종목 · price.json) ---------------- */
+document.getElementById('expandAll').addEventListener('click', () => document.querySelectorAll('.chip').forEach(d => d.open = true));
+document.getElementById('collapseAll').addEventListener('click', () => document.querySelectorAll('.chip').forEach(d => d.open = false));
+
+fetch('./price.json?t=' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    latestPriceData = data;
+    let totalInvested = 0, totalEval = 0;
+
+    document.querySelectorAll('.chip[data-code]').forEach(chip => {
+      const code = chip.dataset.code;
+      const entry = chip.dataset.entry ? Number(chip.dataset.entry) : null;
+      const currency = chip.dataset.currency;
+      const stockDef = STOCKS.find(s => s.code === code);
+
+      const live = data.stocks && data.stocks[code];
+      // held 종목만 손익 합계에 반영 (관심종목 제외)
+      if (stockDef && stockDef.held && entry != null){
+        const invKRW = investedKRW(stockDef);
+        totalInvested += invKRW;
+        let curPrice = entry; // 실시간 데이터 없으면 매입가로 대체(0% 처리)
+        if (live) curPrice = live.price;
+        const curKRW = currency === 'USD' ? curPrice * FX_RATE : curPrice;
+        totalEval += curKRW * stockDef.shares;
+      }
+
+      if (!live) return; // 이 종목은 아직 자동 갱신 데이터 없음(정적값 유지)
+
+      const price = live.price;
+      const changePct = entry ? ((price - entry) / entry) * 100 : null;
+      const up = changePct === null ? true : changePct >= 0;
+
+      const valueEl = chip.querySelector('[data-role="value"]');
+      if (valueEl) valueEl.textContent = currency === 'USD'
+        ? price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : fmt(price);
+
+      const changeEl = chip.querySelector('[data-role="change"]');
+      if (changeEl && changePct !== null) {
+        changeEl.textContent = (up ? '▲ +' : '▼ ') + Math.abs(changePct).toFixed(1) + '%';
+        changeEl.style.color = up ? 'var(--up)' : 'var(--down)';
+      }
+
+      const asofEl = chip.querySelector('[data-role="asof"]');
+      if (asofEl) {
+        const updated = new Date(data.updated_at);
+        asofEl.textContent = updated.toLocaleString('ko-KR', { dateStyle:'medium', timeStyle:'short' }) +
+          ' 기준 · 자동갱신 (전일대비 ' + (live.change_rate >= 0 ? '+' : '') + live.change_rate + '%)';
+      }
+
+      const evalEl = chip.querySelector('[data-role="eval"]');
+      if (evalEl) evalEl.textContent = fmtUnit(stockDef, price * (stockDef ? stockDef.shares : 1));
+
+      if (entry && stockDef && stockDef.bullTP){
+        const range = stockDef.bullTP - entry;
+        const p = Math.max(0, Math.min(100, ((price - entry) / range) * 100));
+        chip.querySelectorAll('[data-role="fill"], [data-role="mini-fill"]').forEach(el => el.style.width = p + '%');
+        const pointerEl = chip.querySelector('[data-role="pointer"]');
+        if (pointerEl) pointerEl.style.left = p + '%';
+      }
+    });
+
+    const statsEl = document.getElementById('headerStats');
+    if (statsEl && totalInvested > 0) {
+      const pnlPct = ((totalEval - totalInvested) / totalInvested) * 100;
+      statsEl.innerHTML = '보유 ' + STOCKS.filter(s=>s.held).length + '종목 · 평가손익 <b style="color:' +
+        (pnlPct >= 0 ? 'var(--up)' : 'var(--down)') + '">' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%</b>';
+    }
+
+    buildComposition(activeCompView);
+  })
+  .catch(() => { console.warn('price.json 로드 실패 — 고정값 표시 중'); });
+</script>
+</body>
+</html>
