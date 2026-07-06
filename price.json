@@ -1,104 +1,104 @@
 {
-  "updated_at": "2026-07-04T14:50:49.775164+00:00",
+  "updated_at": "2026-07-06T04:12:25.653532+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 2425000,
-      "change": 238000,
-      "change_rate": 10.88,
-      "open": 2425000,
-      "high": 2425000,
-      "low": 2425000
+      "price": 2326000,
+      "change": -99000,
+      "change_rate": -4.08,
+      "open": 2326000,
+      "high": 2326000,
+      "low": 2326000
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1111000,
-      "change": -48000,
-      "change_rate": -4.14,
-      "open": 1111000,
-      "high": 1111000,
-      "low": 1111000
+      "price": 1064000,
+      "change": -47000,
+      "change_rate": -4.23,
+      "open": 1064000,
+      "high": 1064000,
+      "low": 1064000
     },
     "010120": {
       "name": "LS ELECTRIC",
-      "price": 229500,
-      "change": -7000,
-      "change_rate": -2.96,
-      "open": 229500,
-      "high": 229500,
-      "low": 229500
+      "price": 213500,
+      "change": -16000,
+      "change_rate": -6.97,
+      "open": 213500,
+      "high": 213500,
+      "low": 213500
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 242000,
-      "change": 16500,
-      "change_rate": 7.32,
-      "open": 242000,
-      "high": 242000,
-      "low": 242000
+      "price": 247500,
+      "change": 5500,
+      "change_rate": 2.27,
+      "open": 247500,
+      "high": 247500,
+      "low": 247500
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 30750,
-      "change": 550,
-      "change_rate": 1.82,
-      "open": 30750,
-      "high": 30750,
-      "low": 30750
+      "price": 31000,
+      "change": 250,
+      "change_rate": 0.81,
+      "open": 31000,
+      "high": 31000,
+      "low": 31000
     },
     "005930": {
       "name": "삼성전자",
       "price": 309500,
-      "change": 23500,
-      "change_rate": 8.22,
+      "change": 0,
+      "change_rate": 0.0,
       "open": 309500,
       "high": 309500,
       "low": 309500
     },
     "003490": {
       "name": "대한항공",
-      "price": 28850,
-      "change": 300,
-      "change_rate": 1.05,
-      "open": 28850,
-      "high": 28850,
-      "low": 28850
+      "price": 28600,
+      "change": -250,
+      "change_rate": -0.87,
+      "open": 28600,
+      "high": 28600,
+      "low": 28600
     },
     "016360": {
       "name": "삼성증권",
-      "price": 119100,
-      "change": 11200,
-      "change_rate": 10.38,
-      "open": 119100,
-      "high": 119100,
-      "low": 119100
+      "price": 120200,
+      "change": 1100,
+      "change_rate": 0.92,
+      "open": 120200,
+      "high": 120200,
+      "low": 120200
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 28605,
-      "change": -270,
-      "change_rate": -0.94,
-      "open": 28605,
-      "high": 28605,
-      "low": 28605
+      "price": 28520,
+      "change": -85,
+      "change_rate": -0.3,
+      "open": 28520,
+      "high": 28520,
+      "low": 28520
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 49825,
-      "change": -1835,
-      "change_rate": -3.55,
-      "open": 49825,
-      "high": 49825,
-      "low": 49825
+      "price": 49720,
+      "change": -105,
+      "change_rate": -0.21,
+      "open": 49720,
+      "high": 49720,
+      "low": 49720
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 201105,
-      "change": -3490,
-      "change_rate": -1.71,
-      "open": 201105,
-      "high": 201105,
-      "low": 201105
+      "price": 200350,
+      "change": -755,
+      "change_rate": -0.38,
+      "open": 200350,
+      "high": 200350,
+      "low": 200350
     },
     "GOOGL": {
       "price": 359.91,
