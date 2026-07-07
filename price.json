@@ -1,21 +1,136 @@
 {
-  "updated_at": "2026-07-06T01:00:00+00:00",
+  "updated_at": "2026-07-07T04:02:39.894071+00:00",
   "stocks": {
-    "000660": { "name": "SK하이닉스", "price": 2335000, "change": -225000, "change_rate": -8.79 },
-    "003230": { "name": "삼양식품", "price": 1111000, "change": -32000, "change_rate": -2.80 },
-    "010120": { "name": "LS ELECTRIC", "price": 227000, "change": -9500, "change_rate": -4.02 },
-    "071050": { "name": "한국금융지주", "price": 234857, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, 매입가로 임시 표시" },
-    "316140": { "name": "우리금융지주", "price": 33250, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, 매입가로 임시 표시" },
-    "005930": { "name": "삼성전자", "price": 309500, "change": 23500, "change_rate": 8.22 },
-    "360750": { "name": "TIGER 미국S&P500", "price": 25052, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, 매입가로 임시 표시" },
-    "418660": { "name": "TIGER 미국나스닥100레버리지", "price": 50600, "change": -1060, "change_rate": -2.05 },
-    "133690": { "name": "TIGER 미국나스닥100", "price": 198766, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, 매입가로 임시 표시" }
+    "000660": {
+      "name": "SK하이닉스",
+      "price": 2128000,
+      "change": -215000,
+      "change_rate": -9.18
+    },
+    "003230": {
+      "name": "삼양식품",
+      "price": 1189000,
+      "change": 91000,
+      "change_rate": 8.29
+    },
+    "010120": {
+      "name": "LS ELECTRIC",
+      "price": 201000,
+      "change": -17500,
+      "change_rate": -8.01
+    },
+    "071050": {
+      "name": "한국금융지주",
+      "price": 238000,
+      "change": -11500,
+      "change_rate": -4.61
+    },
+    "316140": {
+      "name": "우리금융지주",
+      "price": 30800,
+      "change": -350,
+      "change_rate": -1.12
+    },
+    "005930": {
+      "name": "삼성전자",
+      "price": 289750,
+      "change": -28250,
+      "change_rate": -8.88
+    },
+    "360750": {
+      "name": "TIGER 미국S&P500",
+      "price": 28450,
+      "change": -105,
+      "change_rate": -0.37
+    },
+    "418660": {
+      "name": "TIGER 미국나스닥100레버리지",
+      "price": 48720,
+      "change": -1075,
+      "change_rate": -2.16
+    },
+    "133690": {
+      "name": "TIGER 미국나스닥100",
+      "price": 198515,
+      "change": -2060,
+      "change_rate": -1.03
+    },
+    "003490": {
+      "name": "대한항공",
+      "price": 28600,
+      "change": -150,
+      "change_rate": -0.52
+    },
+    "016360": {
+      "name": "삼성증권",
+      "price": 113600,
+      "change": -7700,
+      "change_rate": -6.35
+    },
+    "GOOGL": {
+      "price": 366.46,
+      "change": 6.97,
+      "change_rate": 1.94,
+      "currency": "USD"
+    },
+    "UBER": {
+      "price": 72.42,
+      "change": -1.92,
+      "change_rate": -2.58,
+      "currency": "USD"
+    },
+    "MSFT": {
+      "price": 386.74,
+      "change": -4.08,
+      "change_rate": -1.04,
+      "currency": "USD"
+    },
+    "BRK.B": {
+      "price": 506.58,
+      "change": -0.22,
+      "change_rate": -0.04,
+      "currency": "USD"
+    },
+    "XOM": {
+      "price": 136.44,
+      "change": -0.24,
+      "change_rate": -0.18,
+      "currency": "USD"
+    },
+    "DRAM": {
+      "price": 64.76,
+      "change": 3.56,
+      "change_rate": 5.82,
+      "currency": "USD"
+    }
   },
   "indices": {
-    "KOSPI": { "price": 8100.00, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인(변동성 큰 장중), Actions 실행 시 정확한 값으로 갱신" },
-    "KOSDAQ": { "price": 855.00, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, Actions 실행 시 갱신" },
-    "SPX": { "price": 7480.00, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, Actions 실행 시 갱신" },
-    "NASDAQ": { "price": 25830.00, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, Actions 실행 시 갱신" },
-    "DJI": { "price": 52900.00, "change": 0, "change_rate": 0.0, "_note": "실시간 미확인, Actions 실행 시 갱신" }
+    "KOSPI": {
+      "price": 8100.0,
+      "change": 0,
+      "change_rate": 0.0,
+      "_note": "실시간 미확인(변동성 큰 장중), Actions 실행 시 정확한 값으로 갱신"
+    },
+    "KOSDAQ": {
+      "price": 855.0,
+      "change": 0,
+      "change_rate": 0.0,
+      "_note": "실시간 미확인, Actions 실행 시 갱신"
+    },
+    "SPX": {
+      "price": 7537.43,
+      "change": 54.19,
+      "change_rate": 0.72
+    },
+    "NASDAQ": {
+      "price": 26121.16,
+      "change": 288.49,
+      "change_rate": 1.12
+    },
+    "DJI": {
+      "price": 53055.91,
+      "change": 155.84,
+      "change_rate": 0.29
+    }
   }
 }
