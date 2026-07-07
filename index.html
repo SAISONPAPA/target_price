@@ -123,6 +123,23 @@
   }
   .toolbar button:hover{ border-color: var(--gold-dim); color: var(--gold); }
 
+  .tab-summary{
+    border: 1px solid var(--line); background: var(--bg-raised);
+    padding: 12px 14px; margin-bottom: 12px;
+    font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-dim);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+  }
+  .tab-summary b{ color: var(--ink); font-size: 13px; }
+
+  .control-row{ display:flex; justify-content:space-between; align-items:center; gap: 8px; margin-bottom: 8px; flex-wrap:wrap; }
+  .sort-tabs{ display:flex; gap: 4px; }
+  .sort-tab{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.02em;
+    background: transparent; color: var(--ink-faint); border: 1px solid var(--line);
+    padding: 6px 8px; cursor:pointer;
+  }
+  .sort-tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.06); }
+
   .section-header{
     font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing:.1em;
     color: var(--ink-faint); text-transform: uppercase;
@@ -214,7 +231,10 @@
   <header>
     <div class="brand"><b>PORTFOLIO</b> / TP TRACKER</div>
     <div style="display:flex; align-items:center; gap:10px;">
-      <div class="summary-stats" id="headerStats">계산중...</div>
+      <div>
+        <div class="summary-stats" id="headerStats">계산중...</div>
+        <div class="summary-stats" id="headerHighlight" style="margin-top:3px;"></div>
+      </div>
       <button class="lock-btn" id="lockToggle" type="button">🔒 금액 보기</button>
     </div>
   </header>
@@ -245,9 +265,17 @@
       <div class="index-chip"><div class="index-name">KOSPI</div><div class="index-value">-</div><div class="index-change">-</div></div>
       <div class="index-chip"><div class="index-name">KOSDAQ</div><div class="index-value">-</div><div class="index-change">-</div></div>
     </div>
-    <div class="toolbar">
-      <button type="button" class="expand-all">모두 펼치기</button>
-      <button type="button" class="collapse-all">모두 접기</button>
+    <div class="tab-summary" id="domesticSummary">계산중...</div>
+    <div class="control-row">
+      <div class="sort-tabs" data-scope="domestic">
+        <button class="sort-tab active" data-sort="default">기본순</button>
+        <button class="sort-tab" data-sort="pct">수익률순</button>
+        <button class="sort-tab" data-sort="weight">비중순</button>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="expand-all">모두 펼치기</button>
+        <button type="button" class="collapse-all">모두 접기</button>
+      </div>
     </div>
     <div id="board-domestic"></div>
   </div>
@@ -259,9 +287,17 @@
       <div class="index-chip"><div class="index-name">NASDAQ</div><div class="index-value">-</div><div class="index-change">-</div></div>
       <div class="index-chip"><div class="index-name">DOW</div><div class="index-value">-</div><div class="index-change">-</div></div>
     </div>
-    <div class="toolbar">
-      <button type="button" class="expand-all">모두 펼치기</button>
-      <button type="button" class="collapse-all">모두 접기</button>
+    <div class="tab-summary" id="overseasSummary">계산중...</div>
+    <div class="control-row">
+      <div class="sort-tabs" data-scope="overseas">
+        <button class="sort-tab active" data-sort="default">기본순</button>
+        <button class="sort-tab" data-sort="pct">수익률순</button>
+        <button class="sort-tab" data-sort="weight">비중순</button>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="expand-all">모두 펼치기</button>
+        <button type="button" class="collapse-all">모두 접기</button>
+      </div>
     </div>
     <div id="board-overseas"></div>
   </div>
@@ -325,6 +361,7 @@ function investedKRW(stock){ return stock.currency === 'USD' ? stock.invested * 
 
 let latestPriceData = null;
 let activeCompView = 'all';
+let sortState = { domestic: 'default', overseas: 'default' };
 
 function currentPriceForStock(stock){
   if (latestPriceData && latestPriceData.stocks && latestPriceData.stocks[stock.code]) {
@@ -489,7 +526,28 @@ function renderCard(stock){
   </details>`;
 }
 
-function renderBoardInto(containerId, categories){
+function sortStocks(items, sortMode){
+  if (sortMode === 'default') return items;
+  const withMetric = items.map(s => {
+    let metric;
+    if (sortMode === 'pct'){
+      if (s.entry == null) metric = -Infinity;
+      else {
+        const price = currentPriceForStock(s);
+        metric = ((price - s.entry) / s.entry) * 100;
+      }
+    } else if (sortMode === 'weight'){
+      metric = s.held ? evalKRW(s) : -Infinity;
+    } else {
+      metric = 0;
+    }
+    return { s, metric };
+  });
+  withMetric.sort((a, b) => b.metric - a.metric);
+  return withMetric.map(x => x.s);
+}
+
+function renderBoardInto(containerId, categories, sortMode){
   const board = document.getElementById(containerId);
   const groups = [
     { label:'보유', filter: s => categories.includes(s.category) && s.held },
@@ -497,8 +555,9 @@ function renderBoardInto(containerId, categories){
   ];
   let html = '';
   groups.forEach(g => {
-    const items = STOCKS.filter(g.filter);
+    let items = STOCKS.filter(g.filter);
     if (items.length === 0) return;
+    items = sortStocks(items, sortMode);
     html += `<div class="section-header"><span>${g.label}</span><span>${items.length}종목</span></div>`;
     html += `<div class="board">` + items.map(renderCard).join('') + `</div>`;
   });
@@ -506,9 +565,21 @@ function renderBoardInto(containerId, categories){
 }
 
 function renderAllBoards(){
-  renderBoardInto('board-domestic', ['국내주식','국내ETF']);
-  renderBoardInto('board-overseas', ['해외주식','해외ETF']);
+  renderBoardInto('board-domestic', ['국내주식','국내ETF'], sortState.domestic);
+  renderBoardInto('board-overseas', ['해외주식','해외ETF'], sortState.overseas);
+  applyLiveDataToBoards(); // 재렌더 후 이미 받아온 실시간값 다시 입혀줌
 }
+
+document.querySelectorAll('.sort-tabs').forEach(group => {
+  group.querySelectorAll('.sort-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      group.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sortState[group.dataset.scope] = btn.dataset.sort;
+      renderAllBoards();
+    });
+  });
+});
 
 renderAllBoards();
 buildComposition('all');
@@ -548,91 +619,147 @@ function updateIndexChip(container, name, indexData){
   changeEl.style.color = up ? 'var(--up)' : 'var(--down)';
 }
 
+function relativeTimeText(dateStr){
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const diffMin = Math.round(diffMs / 60000);
+  if (diffMin < 1) return '방금 전';
+  if (diffMin < 60) return diffMin + '분 전';
+  const diffHour = Math.round(diffMin / 60);
+  if (diffHour < 24) return diffHour + '시간 전';
+  return Math.round(diffHour / 24) + '일 전';
+}
+
+function applyLiveDataToBoards(){
+  if (!latestPriceData) return;
+  const data = latestPriceData;
+
+  document.querySelectorAll('.chip[data-code]').forEach(chip => {
+    const code = chip.dataset.code;
+    const entry = chip.dataset.entry ? Number(chip.dataset.entry) : null;
+    const currency = chip.dataset.currency;
+    const stockDef = STOCKS.find(s => s.code === code);
+    const live = data.stocks && data.stocks[code];
+    if (!live) return;
+
+    const price = live.price;
+    const changePct = entry ? ((price - entry) / entry) * 100 : null;
+    const up = changePct === null ? true : changePct >= 0;
+
+    const valueEl = chip.querySelector('[data-role="value"]');
+    if (valueEl) valueEl.textContent = currency === 'USD'
+      ? price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : fmt(price);
+
+    const changeEl = chip.querySelector('[data-role="change"]');
+    if (changeEl && changePct !== null) {
+      changeEl.textContent = (up ? '▲ +' : '▼ ') + Math.abs(changePct).toFixed(1) + '%';
+      changeEl.style.color = up ? 'var(--up)' : 'var(--down)';
+    }
+
+    const asofEl = chip.querySelector('[data-role="asof"]');
+    if (asofEl) {
+      const updated = new Date(data.updated_at);
+      asofEl.textContent = updated.toLocaleString('ko-KR', { dateStyle:'medium', timeStyle:'short' }) +
+        ' 기준 (' + relativeTimeText(data.updated_at) + ') · 자동갱신 (전일대비 ' + (live.change_rate >= 0 ? '+' : '') + live.change_rate + '%)';
+    }
+
+    const evalEl = chip.querySelector('[data-role="eval"]');
+    if (evalEl) evalEl.textContent = fmtUnit(stockDef, price * (stockDef ? stockDef.shares : 1));
+
+    const evalTodayEl = chip.querySelector('[data-role="eval-today"]');
+    if (evalTodayEl && stockDef){
+      const todayAmt = live.change * stockDef.shares;
+      const todayUp = live.change_rate >= 0;
+      evalTodayEl.textContent = '오늘 ' + (todayUp ? '▲ +' : '▼ ') + fmtUnit(stockDef, Math.abs(todayAmt)) + ' (' + (todayUp ? '+' : '') + live.change_rate + '%)';
+      evalTodayEl.style.color = todayUp ? 'var(--up)' : 'var(--down)';
+    }
+
+    if (entry && stockDef && stockDef.bullTP){
+      const range = stockDef.bullTP - entry;
+      const p = Math.max(0, Math.min(100, ((price - entry) / range) * 100));
+      chip.querySelectorAll('[data-role="fill"], [data-role="mini-fill"]').forEach(el => el.style.width = p + '%');
+      const pointerEl = chip.querySelector('[data-role="pointer"]');
+      if (pointerEl) pointerEl.style.left = p + '%';
+    }
+  });
+}
+
+function tabSummaryHTML(categories){
+  const items = STOCKS.filter(s => s.held && categories.includes(s.category));
+  let invested = 0, evalTotal = 0, todayAmtKRW = 0;
+  items.forEach(s => {
+    invested += investedKRW(s);
+    const live = latestPriceData && latestPriceData.stocks && latestPriceData.stocks[s.code];
+    const price = live ? live.price : s.entry;
+    const evalKrwLocal = s.currency === 'USD' ? price * s.shares * FX_RATE : price * s.shares;
+    evalTotal += evalKrwLocal;
+    if (live){
+      const todayKrw = s.currency === 'USD' ? live.change * s.shares * FX_RATE : live.change * s.shares;
+      todayAmtKRW += todayKrw;
+    }
+  });
+  const pnlPct = invested ? ((evalTotal - invested) / invested) * 100 : 0;
+  const todayUp = todayAmtKRW >= 0;
+  return `${items.length}종목 · 평가금액 <b class="sensitive">${fmt(evalTotal)}원</b> ·
+    누적 손익 <b style="color:${pnlPct>=0?'var(--up)':'var(--down)'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</b> ·
+    오늘 <b class="sensitive" style="color:${todayUp?'var(--up)':'var(--down)'}">${todayUp?'+':''}${fmt(todayAmtKRW)}원</b>`;
+}
+
+function updateSummaries(){
+  const data = latestPriceData;
+  let totalInvested = 0, totalEval = 0;
+  let best = null, worst = null;
+
+  STOCKS.filter(s => s.held).forEach(s => {
+    const invKRW = investedKRW(s);
+    totalInvested += invKRW;
+    const live = data && data.stocks && data.stocks[s.code];
+    const curPrice = live ? live.price : s.entry;
+    const curKRW = s.currency === 'USD' ? curPrice * FX_RATE : curPrice;
+    totalEval += curKRW * s.shares;
+
+    if (live && typeof live.change_rate === 'number'){
+      if (!best || live.change_rate > best.rate) best = { name: s.name, rate: live.change_rate };
+      if (!worst || live.change_rate < worst.rate) worst = { name: s.name, rate: live.change_rate };
+    }
+  });
+
+  const statsEl = document.getElementById('headerStats');
+  if (statsEl && totalInvested > 0) {
+    const pnlPct = ((totalEval - totalInvested) / totalInvested) * 100;
+    statsEl.innerHTML = '보유 ' + STOCKS.filter(s=>s.held).length + '종목 · 평가손익 <b style="color:' +
+      (pnlPct >= 0 ? 'var(--up)' : 'var(--down)') + '">' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%</b>';
+  }
+
+  const highlightEl = document.getElementById('headerHighlight');
+  if (highlightEl && best && worst){
+    highlightEl.innerHTML = `오늘 베스트 <b style="color:var(--up)">${best.name} +${best.rate.toFixed(1)}%</b> · 워스트 <b style="color:var(--down)">${worst.name} ${worst.rate.toFixed(1)}%</b>`;
+  }
+
+  const domesticSummaryEl = document.getElementById('domesticSummary');
+  if (domesticSummaryEl) domesticSummaryEl.innerHTML = tabSummaryHTML(['국내주식','국내ETF']);
+  const overseasSummaryEl = document.getElementById('overseasSummary');
+  if (overseasSummaryEl) overseasSummaryEl.innerHTML = tabSummaryHTML(['해외주식','해외ETF']);
+
+  if (data && data.indices){
+    const domesticContainer = document.getElementById('domesticIndices');
+    const overseasContainer = document.getElementById('overseasIndices');
+    updateIndexChip(domesticContainer, 'KOSPI', data.indices.KOSPI);
+    updateIndexChip(domesticContainer, 'KOSDAQ', data.indices.KOSDAQ);
+    updateIndexChip(overseasContainer, 'S&P500', data.indices.SPX);
+    updateIndexChip(overseasContainer, 'NASDAQ', data.indices.NASDAQ);
+    updateIndexChip(overseasContainer, 'DOW', data.indices.DJI);
+  }
+
+  buildComposition(activeCompView);
+}
+
 fetch('./price.json?t=' + Date.now())
   .then(r => r.json())
   .then(data => {
     latestPriceData = data;
-    let totalInvested = 0, totalEval = 0;
-
-    document.querySelectorAll('.chip[data-code]').forEach(chip => {
-      const code = chip.dataset.code;
-      const entry = chip.dataset.entry ? Number(chip.dataset.entry) : null;
-      const currency = chip.dataset.currency;
-      const stockDef = STOCKS.find(s => s.code === code);
-
-      const live = data.stocks && data.stocks[code];
-
-      if (stockDef && stockDef.held && entry != null){
-        const invKRW = investedKRW(stockDef);
-        totalInvested += invKRW;
-        let curPrice = entry;
-        if (live) curPrice = live.price;
-        const curKRW = currency === 'USD' ? curPrice * FX_RATE : curPrice;
-        totalEval += curKRW * stockDef.shares;
-      }
-
-      if (!live) return;
-
-      const price = live.price;
-      const changePct = entry ? ((price - entry) / entry) * 100 : null;
-      const up = changePct === null ? true : changePct >= 0;
-
-      const valueEl = chip.querySelector('[data-role="value"]');
-      if (valueEl) valueEl.textContent = currency === 'USD'
-        ? price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : fmt(price);
-
-      const changeEl = chip.querySelector('[data-role="change"]');
-      if (changeEl && changePct !== null) {
-        changeEl.textContent = (up ? '▲ +' : '▼ ') + Math.abs(changePct).toFixed(1) + '%';
-        changeEl.style.color = up ? 'var(--up)' : 'var(--down)';
-      }
-
-      const asofEl = chip.querySelector('[data-role="asof"]');
-      if (asofEl) {
-        const updated = new Date(data.updated_at);
-        asofEl.textContent = updated.toLocaleString('ko-KR', { dateStyle:'medium', timeStyle:'short' }) +
-          ' 기준 · 자동갱신 (전일대비 ' + (live.change_rate >= 0 ? '+' : '') + live.change_rate + '%)';
-      }
-
-      const evalEl = chip.querySelector('[data-role="eval"]');
-      if (evalEl) evalEl.textContent = fmtUnit(stockDef, price * (stockDef ? stockDef.shares : 1));
-
-      const evalTodayEl = chip.querySelector('[data-role="eval-today"]');
-      if (evalTodayEl && stockDef){
-        const todayAmt = live.change * stockDef.shares;
-        const todayUp = live.change_rate >= 0;
-        evalTodayEl.textContent = '오늘 ' + (todayUp ? '▲ +' : '▼ ') + fmtUnit(stockDef, Math.abs(todayAmt)) + ' (' + (todayUp ? '+' : '') + live.change_rate + '%)';
-        evalTodayEl.style.color = todayUp ? 'var(--up)' : 'var(--down)';
-      }
-
-      if (entry && stockDef && stockDef.bullTP){
-        const range = stockDef.bullTP - entry;
-        const p = Math.max(0, Math.min(100, ((price - entry) / range) * 100));
-        chip.querySelectorAll('[data-role="fill"], [data-role="mini-fill"]').forEach(el => el.style.width = p + '%');
-        const pointerEl = chip.querySelector('[data-role="pointer"]');
-        if (pointerEl) pointerEl.style.left = p + '%';
-      }
-    });
-
-    const statsEl = document.getElementById('headerStats');
-    if (statsEl && totalInvested > 0) {
-      const pnlPct = ((totalEval - totalInvested) / totalInvested) * 100;
-      statsEl.innerHTML = '보유 ' + STOCKS.filter(s=>s.held).length + '종목 · 평가손익 <b style="color:' +
-        (pnlPct >= 0 ? 'var(--up)' : 'var(--down)') + '">' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%</b>';
-    }
-
-    if (data.indices){
-      const domesticContainer = document.getElementById('domesticIndices');
-      const overseasContainer = document.getElementById('overseasIndices');
-      updateIndexChip(domesticContainer, 'KOSPI', data.indices.KOSPI);
-      updateIndexChip(domesticContainer, 'KOSDAQ', data.indices.KOSDAQ);
-      updateIndexChip(overseasContainer, 'S&P500', data.indices.SPX);
-      updateIndexChip(overseasContainer, 'NASDAQ', data.indices.NASDAQ);
-      updateIndexChip(overseasContainer, 'DOW', data.indices.DJI);
-    }
-
-    buildComposition(activeCompView);
+    applyLiveDataToBoards();
+    updateSummaries();
   })
   .catch(() => { console.warn('price.json 로드 실패 — 고정값 표시 중'); });
 </script>
