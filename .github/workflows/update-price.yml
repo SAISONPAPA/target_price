@@ -37,6 +37,7 @@ jobs:
           git add price.json
           if ! git diff --staged --quiet; then
             git commit -m "chore: update price $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin main
             git push
           else
             echo "no changes"
