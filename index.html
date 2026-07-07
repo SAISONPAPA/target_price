@@ -60,15 +60,41 @@
   .summary-stats{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); text-align:right; line-height:1.6; }
   .summary-stats b{ color: var(--ink); }
 
-  /* ---- Composition panel ---- */
-  .comp-panel{
-    border: 1px solid var(--line); background: var(--bg-raised);
-    padding: 14px 16px 16px; margin-bottom: 14px;
+  .lock-btn{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:.04em;
+    background: var(--bg-raised); color: var(--gold); border: 1px solid var(--gold-dim);
+    padding: 6px 10px; cursor: pointer; white-space: nowrap;
   }
+  body.unlocked .lock-btn{ color: var(--ink-faint); border-color: var(--line); }
+
+  /* ---- 상단 탭 ---- */
+  .main-tabs{ display:flex; gap: 6px; margin-bottom: 14px; }
+  .main-tab{
+    flex:1; font-family:'Space Grotesk', sans-serif; font-size: 13px; font-weight:600; letter-spacing:.02em;
+    background: var(--bg-raised); color: var(--ink-dim); border: 1px solid var(--line);
+    padding: 11px 6px; cursor:pointer; text-align:center;
+  }
+  .main-tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.08); }
+  .main-panel{ display:none; }
+  .main-panel.active{ display:block; }
+
+  /* ---- 지수 티커 ---- */
+  .index-row{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .index-row.triple{ grid-template-columns: repeat(3, 1fr); }
+  .index-chip{
+    border: 1px solid var(--line); background: var(--bg-raised);
+    padding: 10px 10px; text-align:center;
+  }
+  .index-name{ font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.08em; color: var(--ink-faint); margin-bottom:6px; }
+  .index-value{ font-family:'IBM Plex Mono', monospace; font-size: 15px; font-weight:600; color: var(--ink); }
+  .index-change{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; margin-top: 3px; color: var(--ink-faint); }
+
+  /* ---- Composition panel ---- */
+  .comp-panel{ border: 1px solid var(--line); background: var(--bg-raised); padding: 14px 16px 16px; margin-bottom: 14px; }
   .comp-title{
     font-family:'Space Grotesk', sans-serif; font-size: 12.5px; letter-spacing:.08em;
     color: var(--ink-dim); text-transform: uppercase; margin-bottom: 10px;
-    display:flex; justify-content:space-between; align-items:center;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;
   }
   .comp-title span.note{ font-family:'IBM Plex Mono', monospace; font-size: 9.5px; color: var(--ink-faint); text-transform:none; letter-spacing:0; }
   .comp-tabs{ display:flex; gap: 6px; margin-bottom: 14px; }
@@ -79,10 +105,7 @@
   }
   .comp-tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.06); }
 
-  .comp-bar{
-    display:flex; height: 22px; width:100%; overflow:hidden;
-    border: 1px solid var(--line); margin-bottom: 12px;
-  }
+  .comp-bar{ display:flex; height: 22px; width:100%; overflow:hidden; border: 1px solid var(--line); margin-bottom: 12px; }
   .comp-bar-seg{ height:100%; }
 
   .comp-legend{ display:flex; flex-direction:column; gap: 7px; }
@@ -160,6 +183,7 @@
   .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-bottom: 18px; }
   .field .k{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); letter-spacing:.06em; margin-bottom: 4px; }
   .field .v{ font-family:'IBM Plex Mono', monospace; font-size: 14px; color: var(--ink); }
+  .eval-today{ font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-faint); margin-top: 4px; }
 
   .scenarios{ display:grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 4px; }
   .scenario{ border: 1px solid var(--line); padding: 10px 8px; text-align:center; background: rgba(255,255,255,0.015); }
@@ -176,22 +200,12 @@
     .scenarios{ grid-template-columns: 1fr; }
     .sum-price{ font-size: 15px; }
     .comp-amt{ display:none; }
+    .index-value{ font-size: 13px; }
   }
 
   /* ---- 민감정보 가림막 ---- */
-  .sensitive{
-    filter: blur(6px);
-    user-select: none;
-    transition: filter .15s ease;
-  }
+  .sensitive{ filter: blur(6px); user-select: none; transition: filter .15s ease; }
   body.unlocked .sensitive{ filter: none; }
-
-  .lock-btn{
-    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:.04em;
-    background: var(--bg-raised); color: var(--gold); border: 1px solid var(--gold-dim);
-    padding: 6px 10px; cursor: pointer; white-space: nowrap;
-  }
-  body.unlocked .lock-btn{ color: var(--ink-faint); border-color: var(--line); }
 </style>
 </head>
 <body>
@@ -205,36 +219,59 @@
     </div>
   </header>
 
-  <div class="comp-panel">
-    <div class="comp-title">포트폴리오 비중 <span class="note">평가금액 기준 · 관심종목 제외 · 실시간 미반영 종목은 매입가로 임시 계산</span></div>
-    <div class="comp-tabs">
-      <button class="comp-tab active" data-view="all">전체</button>
-      <button class="comp-tab" data-view="domestic">국내(주식+ETF)</button>
-      <button class="comp-tab" data-view="overseas">해외(주식+ETF)</button>
+  <div class="main-tabs">
+    <button class="main-tab active" data-tab="portfolio">포트폴리오</button>
+    <button class="main-tab" data-tab="domestic">국내주식</button>
+    <button class="main-tab" data-tab="overseas">해외주식</button>
+  </div>
+
+  <!-- ===== 탭 1: 포트폴리오 ===== -->
+  <div class="main-panel active" data-panel="portfolio">
+    <div class="comp-panel">
+      <div class="comp-title">포트폴리오 비중 <span class="note">평가금액 기준 · 관심종목 제외 · 실시간 미반영 종목은 매입가로 임시 계산</span></div>
+      <div class="comp-tabs">
+        <button class="comp-tab active" data-view="all">전체</button>
+        <button class="comp-tab" data-view="domestic">국내(주식+ETF)</button>
+        <button class="comp-tab" data-view="overseas">해외(주식+ETF)</button>
+      </div>
+      <div class="comp-bar" id="compBar"></div>
+      <div class="comp-legend" id="compLegend"></div>
     </div>
-    <div class="comp-bar" id="compBar"></div>
-    <div class="comp-legend" id="compLegend"></div>
   </div>
 
-  <div class="toolbar">
-    <button type="button" id="expandAll">모두 펼치기</button>
-    <button type="button" id="collapseAll">모두 접기</button>
+  <!-- ===== 탭 2: 국내주식 ===== -->
+  <div class="main-panel" data-panel="domestic">
+    <div class="index-row" id="domesticIndices">
+      <div class="index-chip"><div class="index-name">KOSPI</div><div class="index-value">-</div><div class="index-change">-</div></div>
+      <div class="index-chip"><div class="index-name">KOSDAQ</div><div class="index-value">-</div><div class="index-change">-</div></div>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="expand-all">모두 펼치기</button>
+      <button type="button" class="collapse-all">모두 접기</button>
+    </div>
+    <div id="board-domestic"></div>
   </div>
 
-  <div id="board"></div>
+  <!-- ===== 탭 3: 해외주식 ===== -->
+  <div class="main-panel" data-panel="overseas">
+    <div class="index-row" id="overseasIndices" style="grid-template-columns:repeat(3,1fr);">
+      <div class="index-chip"><div class="index-name">S&amp;P 500</div><div class="index-value">-</div><div class="index-change">-</div></div>
+      <div class="index-chip"><div class="index-name">NASDAQ</div><div class="index-value">-</div><div class="index-change">-</div></div>
+      <div class="index-chip"><div class="index-name">DOW</div><div class="index-value">-</div><div class="index-change">-</div></div>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="expand-all">모두 펼치기</button>
+      <button type="button" class="collapse-all">모두 접기</button>
+    </div>
+    <div id="board-overseas"></div>
+  </div>
+
 </div>
 
 <script>
-/* =========================================================
-   데이터 모델
-   - invested: 매입금액 (원화 종목은 원, 해외 종목은 USD)
-   - finalTP/bullTP/baseTP/bearTP: null이면 해당 시나리오 없음
-   - held:false + watch:true => 관심종목(미보유)
-   ========================================================= */
-const FX_RATE = 1530; // 2026.07.03 기준 대략치, 필요시 수정
+const FX_RATE = 1530; // 2026.07 기준 대략치, 필요시 수정
 
 const STOCKS = [
-  // 국내주식 · 보유
   { code:'000660', name:'SK하이닉스', category:'국내주식', held:true, currency:'KRW',
     entry:1678000, shares:2, invested:3356000, finalTP:3200000, bullTP:7033691, baseTP:5311644, bearTP:4294255 },
   { code:'003230', name:'삼양식품', category:'국내주식', held:true, currency:'KRW',
@@ -245,18 +282,14 @@ const STOCKS = [
     entry:234857, shares:7, invested:1643999, finalTP:600000, bullTP:993649, baseTP:886674, bearTP:808186 },
   { code:'316140', name:'우리금융지주', category:'국내주식', held:true, currency:'KRW',
     entry:33250, shares:30, invested:997500, finalTP:40000, bullTP:81243, baseTP:74947, bearTP:69068 },
-
-  // 국내주식 · 보유
   { code:'005930', name:'삼성전자', category:'국내주식', held:true, currency:'KRW',
     entry:290000, shares:3, invested:870000, finalTP:400000, bullTP:537358, baseTP:349001, bearTP:243589 },
 
-  // 국내주식 · 관심 (미보유)
   { code:'003490', name:'대한항공', category:'국내주식', held:false, watch:true, currency:'KRW',
     entry:null, shares:null, invested:null, finalTP:null, bullTP:38204, baseTP:33942, bearTP:29125 },
   { code:'016360', name:'삼성증권', category:'국내주식', held:false, watch:true, currency:'KRW',
     entry:null, shares:null, invested:null, finalTP:null, bullTP:300469, baseTP:269019, bearTP:241315 },
 
-  // 국내ETF · 보유
   { code:'360750', name:'TIGER 미국S&P500', category:'국내ETF', held:true, currency:'KRW',
     entry:25052, shares:242, invested:6062584, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
   { code:'418660', name:'TIGER 미국나스닥100레버리지', category:'국내ETF', held:true, currency:'KRW',
@@ -264,7 +297,6 @@ const STOCKS = [
   { code:'133690', name:'TIGER 미국나스닥100', category:'국내ETF', held:true, currency:'KRW',
     entry:198766, shares:3, invested:596298, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
 
-  // 해외주식 · 보유 (USD, 아직 실시간 자동연동 전)
   { code:'GOOGL', name:'GOOGL', category:'해외주식', held:true, currency:'USD',
     entry:228.79, shares:8, invested:1830.30, finalTP:380, bullTP:463, baseTP:320, bearTP:263 },
   { code:'UBER', name:'UBER', category:'해외주식', held:true, currency:'USD',
@@ -276,15 +308,12 @@ const STOCKS = [
   { code:'XOM', name:'XOM', category:'해외주식', held:true, currency:'USD',
     entry:136.28, shares:1, invested:136.28, finalTP:null, bullTP:150, baseTP:139, bearTP:123 },
 
-  // 해외ETF · 보유
   { code:'DRAM', name:'DRAM (ETF)', category:'해외ETF', held:true, currency:'USD',
     entry:51.20, shares:20, invested:1024.00, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
 ];
 
-const CATEGORY_ORDER = ['국내주식','국내ETF','해외주식','해외ETF'];
-const CATEGORY_LABEL = { '국내주식':'국내주식', '국내ETF':'국내ETF', '해외주식':'해외주식', '해외ETF':'해외ETF' };
 const CATEGORY_COLORS = {
-  '국내주식': ['#3ea36b','#2f8a58','#256e46','#1c5636','#153f28'],
+  '국내주식': ['#3ea36b','#2f8a58','#256e46','#1c5636','#153f28','#0f3a26'],
   '국내ETF':  ['#c9a227','#a9861f','#8a6c19'],
   '해외주식': ['#4f8ef7','#3f74c9','#2f5a9b','#28497d','#1f3860'],
   '해외ETF':  ['#9aa79c'],
@@ -294,14 +323,14 @@ function fmt(n){ return Math.round(n).toLocaleString('ko-KR'); }
 function fmtUnit(stock, n){ return stock.currency === 'USD' ? ('$' + Number(n).toLocaleString('en-US', {maximumFractionDigits:2})) : (fmt(n) + '원'); }
 function investedKRW(stock){ return stock.currency === 'USD' ? stock.invested * FX_RATE : stock.invested; }
 
-let latestPriceData = null; // price.json 로드되면 채워짐
+let latestPriceData = null;
 let activeCompView = 'all';
 
 function currentPriceForStock(stock){
   if (latestPriceData && latestPriceData.stocks && latestPriceData.stocks[stock.code]) {
     return latestPriceData.stocks[stock.code].price;
   }
-  return stock.entry; // 실시간 데이터 없으면 매입가로 대체
+  return stock.entry;
 }
 function evalKRW(stock){
   const price = currentPriceForStock(stock);
@@ -309,7 +338,6 @@ function evalKRW(stock){
   return stock.currency === 'USD' ? value * FX_RATE : value;
 }
 
-/* ---------------- 포트폴리오 비중 (평가금액 기준) ---------------- */
 function buildComposition(view){
   activeCompView = view;
   let pool = STOCKS.filter(s => s.held);
@@ -332,10 +360,7 @@ function buildComposition(view){
 
   const bar = document.getElementById('compBar');
   const legend = document.getElementById('compLegend');
-  bar.innerHTML = withKRW.map(x =>
-    `<div class="comp-bar-seg" style="width:${x.pct}%;background:${x.color}"></div>`
-  ).join('');
-
+  bar.innerHTML = withKRW.map(x => `<div class="comp-bar-seg" style="width:${x.pct}%;background:${x.color}"></div>`).join('');
   legend.innerHTML = withKRW.map(x =>
     `<div class="comp-row">
        <div class="comp-dot" style="background:${x.color}"></div>
@@ -354,7 +379,15 @@ document.querySelectorAll('.comp-tab').forEach(btn => {
   });
 });
 
-/* ---------------- 종목 카드 렌더링 ---------------- */
+document.querySelectorAll('.main-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.main-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+  });
+});
+
 function scenarioBox(cls, label, value, entry, currency){
   if (value == null) return '';
   const pct = entry ? (((value - entry) / entry) * 100).toFixed(1) : null;
@@ -363,6 +396,17 @@ function scenarioBox(cls, label, value, entry, currency){
     <div class="v">${currency === 'USD' ? '$' + value.toLocaleString('en-US') : value.toLocaleString('ko-KR')}</div>
     ${pct !== null ? `<div class="p">${pct >= 0 ? '+' : ''}${pct}%</div>` : ''}
   </div>`;
+}
+
+function pos(stock, value){
+  if (!stock.entry || !stock.bullTP) return 0;
+  const range = stock.bullTP - stock.entry;
+  if (range <= 0) return 0;
+  return Math.max(0, Math.min(100, ((value - stock.entry) / range) * 100));
+}
+function short(value, currency){
+  if (currency === 'USD') return '$' + value.toLocaleString('en-US');
+  return (value/10000).toFixed(0) + '만';
 }
 
 function renderCard(stock){
@@ -397,7 +441,11 @@ function renderCard(stock){
       <div class="field"><div class="k">매입가</div><div class="v">${fmtUnit(stock, stock.entry)}</div></div>
       <div class="field"><div class="k">주수</div><div class="v sensitive">${stock.shares}주</div></div>
       <div class="field"><div class="k">매입금액</div><div class="v sensitive">${fmtUnit(stock, stock.invested)}</div></div>
-      <div class="field"><div class="k">평가금액</div><div class="v sensitive" data-role="eval">${fmtUnit(stock, stock.invested)}</div></div>
+      <div class="field">
+        <div class="k">평가금액</div>
+        <div class="v sensitive" data-role="eval">${fmtUnit(stock, stock.invested)}</div>
+        <div class="eval-today" data-role="eval-today">오늘 -</div>
+      </div>
     </div>` : `<div class="no-tp-note">보유하지 않은 관심종목 — 목표주가만 참고용으로 등록됨</div>`;
 
   const scenariosHTML = hasTP ? `
@@ -441,27 +489,13 @@ function renderCard(stock){
   </details>`;
 }
 
-function pos(stock, value){
-  if (!stock.entry || !stock.bullTP) return 0;
-  const range = stock.bullTP - stock.entry;
-  if (range <= 0) return 0;
-  return Math.max(0, Math.min(100, ((value - stock.entry) / range) * 100));
-}
-function short(value, currency){
-  if (currency === 'USD') return '$' + value.toLocaleString('en-US');
-  return (value/10000).toFixed(0) + '만';
-}
-
-function renderBoard(){
-  const board = document.getElementById('board');
-  let html = '';
+function renderBoardInto(containerId, categories){
+  const board = document.getElementById(containerId);
   const groups = [
-    { key:'국내주식-보유', label:'국내주식 · 보유', filter: s => s.category==='국내주식' && s.held },
-    { key:'국내주식-관심', label:'국내주식 · 관심 (미보유)', filter: s => s.category==='국내주식' && !s.held },
-    { key:'국내ETF-보유', label:'국내ETF · 보유', filter: s => s.category==='국내ETF' && s.held },
-    { key:'해외주식-보유', label:'해외주식 · 보유', filter: s => s.category==='해외주식' && s.held },
-    { key:'해외ETF-보유', label:'해외ETF · 보유', filter: s => s.category==='해외ETF' && s.held },
+    { label:'보유', filter: s => categories.includes(s.category) && s.held },
+    { label:'관심 (미보유)', filter: s => categories.includes(s.category) && !s.held },
   ];
+  let html = '';
   groups.forEach(g => {
     const items = STOCKS.filter(g.filter);
     if (items.length === 0) return;
@@ -471,15 +505,20 @@ function renderBoard(){
   board.innerHTML = html;
 }
 
-renderBoard();
+function renderAllBoards(){
+  renderBoardInto('board-domestic', ['국내주식','국내ETF']);
+  renderBoardInto('board-overseas', ['해외주식','해외ETF']);
+}
+
+renderAllBoards();
 buildComposition('all');
 
-/* ---------------- 실시간 시세 반영 (국내 종목 · price.json) ---------------- */
-document.getElementById('expandAll').addEventListener('click', () => document.querySelectorAll('.chip').forEach(d => d.open = true));
-document.getElementById('collapseAll').addEventListener('click', () => document.querySelectorAll('.chip').forEach(d => d.open = false));
+document.querySelectorAll('.expand-all').forEach(btn => btn.addEventListener('click', () =>
+  document.querySelectorAll('.chip').forEach(d => d.open = true)));
+document.querySelectorAll('.collapse-all').forEach(btn => btn.addEventListener('click', () =>
+  document.querySelectorAll('.chip').forEach(d => d.open = false)));
 
-/* ---------------- 금액 가림막 (약한 보호 — 흘끗 보는 것만 방지, 페이지 소스에는 그대로 남음) ---------------- */
-const UNLOCK_PASSWORD = "saison"; // 배포 전에 반드시 원하는 비밀번호로 바꿀 것
+const UNLOCK_PASSWORD = "saison";
 
 document.getElementById('lockToggle').addEventListener('click', () => {
   if (document.body.classList.contains('unlocked')) {
@@ -496,6 +535,19 @@ document.getElementById('lockToggle').addEventListener('click', () => {
   }
 });
 
+function updateIndexChip(container, name, indexData){
+  if (!indexData) return;
+  const chip = Array.from(container.querySelectorAll('.index-chip')).find(c =>
+    c.querySelector('.index-name').textContent.replace(/\s/g,'') === name.replace(/\s/g,''));
+  if (!chip) return;
+  const valueEl = chip.querySelector('.index-value');
+  const changeEl = chip.querySelector('.index-change');
+  valueEl.textContent = Number(indexData.price).toLocaleString('ko-KR', {maximumFractionDigits:2});
+  const up = indexData.change_rate >= 0;
+  changeEl.textContent = (up ? '▲ +' : '▼ ') + Math.abs(indexData.change_rate).toFixed(2) + '%';
+  changeEl.style.color = up ? 'var(--up)' : 'var(--down)';
+}
+
 fetch('./price.json?t=' + Date.now())
   .then(r => r.json())
   .then(data => {
@@ -509,17 +561,17 @@ fetch('./price.json?t=' + Date.now())
       const stockDef = STOCKS.find(s => s.code === code);
 
       const live = data.stocks && data.stocks[code];
-      // held 종목만 손익 합계에 반영 (관심종목 제외)
+
       if (stockDef && stockDef.held && entry != null){
         const invKRW = investedKRW(stockDef);
         totalInvested += invKRW;
-        let curPrice = entry; // 실시간 데이터 없으면 매입가로 대체(0% 처리)
+        let curPrice = entry;
         if (live) curPrice = live.price;
         const curKRW = currency === 'USD' ? curPrice * FX_RATE : curPrice;
         totalEval += curKRW * stockDef.shares;
       }
 
-      if (!live) return; // 이 종목은 아직 자동 갱신 데이터 없음(정적값 유지)
+      if (!live) return;
 
       const price = live.price;
       const changePct = entry ? ((price - entry) / entry) * 100 : null;
@@ -545,7 +597,14 @@ fetch('./price.json?t=' + Date.now())
 
       const evalEl = chip.querySelector('[data-role="eval"]');
       if (evalEl) evalEl.textContent = fmtUnit(stockDef, price * (stockDef ? stockDef.shares : 1));
-      // evalEl은 이미 HTML에 class="sensitive"가 있어서 textContent만 바꿔도 블러 유지됨
+
+      const evalTodayEl = chip.querySelector('[data-role="eval-today"]');
+      if (evalTodayEl && stockDef){
+        const todayAmt = live.change * stockDef.shares;
+        const todayUp = live.change_rate >= 0;
+        evalTodayEl.textContent = '오늘 ' + (todayUp ? '▲ +' : '▼ ') + fmtUnit(stockDef, Math.abs(todayAmt)) + ' (' + (todayUp ? '+' : '') + live.change_rate + '%)';
+        evalTodayEl.style.color = todayUp ? 'var(--up)' : 'var(--down)';
+      }
 
       if (entry && stockDef && stockDef.bullTP){
         const range = stockDef.bullTP - entry;
@@ -561,6 +620,16 @@ fetch('./price.json?t=' + Date.now())
       const pnlPct = ((totalEval - totalInvested) / totalInvested) * 100;
       statsEl.innerHTML = '보유 ' + STOCKS.filter(s=>s.held).length + '종목 · 평가손익 <b style="color:' +
         (pnlPct >= 0 ? 'var(--up)' : 'var(--down)') + '">' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(1) + '%</b>';
+    }
+
+    if (data.indices){
+      const domesticContainer = document.getElementById('domesticIndices');
+      const overseasContainer = document.getElementById('overseasIndices');
+      updateIndexChip(domesticContainer, 'KOSPI', data.indices.KOSPI);
+      updateIndexChip(domesticContainer, 'KOSDAQ', data.indices.KOSDAQ);
+      updateIndexChip(overseasContainer, 'S&P500', data.indices.SPX);
+      updateIndexChip(overseasContainer, 'NASDAQ', data.indices.NASDAQ);
+      updateIndexChip(overseasContainer, 'DOW', data.indices.DJI);
     }
 
     buildComposition(activeCompView);
