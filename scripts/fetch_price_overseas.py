@@ -1,7 +1,8 @@
 """
-해외종목(미국 상장) 현재가를 yfinance로 가져와 price.json에 병합한다.
-scripts/fetch_price.py(네이버, 국내종목)를 먼저 실행해 기본 price.json을 만든 뒤
-이 스크립트를 실행해서 해외종목 데이터를 같은 파일에 합치는 순서로 사용한다.
+해외종목(미국 상장) + 미국 3대 지수(S&P500/NASDAQ/DOW) 현재가를
+yfinance로 가져와 price.json에 병합한다.
+scripts/fetch_price.py(네이버, 국내종목/지수)와 순서 상관없이 실행 가능 —
+서로 읽고(load) 병합(merge)한 뒤 저장(save)하는 방식이라 덮어쓰지 않는다.
 """
 
 import json
@@ -17,6 +18,13 @@ TICKERS = {
     "BRK.B": "BRK-B",
     "XOM": "XOM",
     "DRAM": "DRAM",
+}
+
+# 미국 3대 지수
+INDEX_TICKERS = {
+    "SPX": "^GSPC",     # S&P 500
+    "NASDAQ": "^IXIC",  # 나스닥 종합지수
+    "DJI": "^DJI",      # 다우존스 산업평균
 }
 
 PRICE_JSON = "price.json"
@@ -41,10 +49,10 @@ def main():
         with open(PRICE_JSON, "r", encoding="utf-8") as f:
             data = json.load(f)
     except FileNotFoundError:
-        data = {"updated_at": "", "stocks": {}}
+        data = {}
 
     data.setdefault("stocks", {})
-    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    data.setdefault("indices", {})
 
     for code, yf_ticker in TICKERS.items():
         try:
@@ -54,7 +62,15 @@ def main():
             continue
         data["stocks"][code] = {**data["stocks"].get(code, {}), **result, "currency": "USD"}
 
-    data["updated_at"] = now
+    for label, yf_ticker in INDEX_TICKERS.items():
+        try:
+            result = fetch_one(yf_ticker)
+        except Exception as e:
+            print(f"[경고] 지수 {label}({yf_ticker}) 조회 실패: {e}")
+            continue
+        data["indices"][label] = result
+
+    data["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     with open(PRICE_JSON, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
