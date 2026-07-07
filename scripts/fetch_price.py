@@ -79,16 +79,46 @@ def fetch_stock(code: str) -> dict:
 
 
 def fetch_index(index_code: str) -> dict:
-    url = f"https://finance.naver.com/sise/sise_index.naver?code={index_code}"
+    """코스피/코스닥 등 지수 조회.
+    실시간 지수 페이지(sise_index.naver)는 DOM 구조가 자주 바뀌어서,
+    더 안정적인 일별시세 테이블(sise_index_day.naver)의 최신 행을 읽는 방식으로 처리한다.
+    테이블 컬럼 순서: 날짜, 종가, 전일비, 등락률, 거래량, 거래대금
+    """
+    url = f"https://finance.naver.com/sise/sise_index_day.naver?code={index_code}"
     res = requests.get(url, headers=HEADERS, timeout=10)
     res.raise_for_status()
     soup = BeautifulSoup(res.text, "html.parser")
-    price, change, change_rate = _parse_today_block(soup)
-    return {
-        "price": round(price, 2),
-        "change": round(change, 2),
-        "change_rate": round(change_rate, 2),
-    }
+
+    table = soup.find("table", class_="type_1")
+    if table is None:
+        raise RuntimeError(f"[{index_code}] 지수 테이블(table.type_1)을 찾지 못함 — 페이지 구조 변경 가능성")
+
+    for row in table.find_all("tr"):
+        cols = row.find_all("td")
+        if len(cols) != 6:
+            continue  # 헤더/빈 행 등은 건너뜀
+
+        price = float(cols[1].get_text(strip=True).replace(",", ""))
+        diff = float(cols[2].get_text(strip=True).replace(",", "") or 0)
+        rate = float(cols[3].get_text(strip=True).replace("%", "").replace(",", "") or 0)
+
+        # 상승/하락 아이콘으로 부호 판별 (전일비/등락률 칸에 이미지로 표시됨)
+        img = cols[2].find("img")
+        is_down = False
+        if img:
+            alt = img.get("alt", "")
+            src = img.get("src", "")
+            if "하락" in alt or "dn" in src or "down" in src:
+                is_down = True
+
+        if is_down:
+            diff, rate = -abs(diff), -abs(rate)
+        else:
+            diff, rate = abs(diff), abs(rate)
+
+        return {"price": price, "change": diff, "change_rate": rate}
+
+    raise RuntimeError(f"[{index_code}] 데이터 행을 찾지 못함")
 
 
 def main():
