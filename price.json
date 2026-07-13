@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-13T06:40:16.416548+00:00",
+  "updated_at": "2026-07-13T10:01:07.671756+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -69,38 +69,38 @@
     },
     "GOOGL": {
       "price": 357.18,
-      "change": -0.37,
-      "change_rate": -0.1,
+      "change": 0.01,
+      "change_rate": 0.0,
       "currency": "USD"
     },
     "UBER": {
       "price": 74.54,
-      "change": 0.22,
-      "change_rate": 0.3,
+      "change": -0.11,
+      "change_rate": -0.15,
       "currency": "USD"
     },
     "MSFT": {
       "price": 385.1,
-      "change": 0.99,
-      "change_rate": 0.26,
+      "change": -0.25,
+      "change_rate": -0.06,
       "currency": "USD"
     },
     "BRK.B": {
       "price": 493.71,
-      "change": -1.73,
-      "change_rate": -0.35,
+      "change": -0.29,
+      "change_rate": -0.06,
       "currency": "USD"
     },
     "XOM": {
       "price": 138.88,
-      "change": 1.42,
-      "change_rate": 1.03,
+      "change": 0.08,
+      "change_rate": 0.06,
       "currency": "USD"
     },
     "DRAM": {
       "price": 63.04,
-      "change": -2.08,
-      "change_rate": -3.2,
+      "change": 0.05,
+      "change_rate": 0.08,
       "currency": "USD"
     }
   },
