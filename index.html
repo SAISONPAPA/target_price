@@ -160,6 +160,31 @@
 
   .no-tp-note{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin-top: 10px; }
 
+  /* ---- 매도완료 ---- */
+  .closed-empty{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-faint);
+    border: 1px dashed var(--line); padding: 30px 16px; text-align:center;
+  }
+  .closed-summary{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-dim); margin-bottom: 4px; }
+  .exit-pointer{
+    position:absolute; top:-16px; width:0; height:0;
+    border-left: 5px solid transparent; border-right: 5px solid transparent;
+    border-top: 7px solid var(--gold); transform: translateX(-5px);
+  }
+  .exit-pointer .tag{
+    position:absolute; top:-20px; left:50%; transform: translateX(-50%);
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold);
+    white-space:nowrap; font-weight:600;
+  }
+  .band-badge{
+    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size: 10.5px;
+    padding: 5px 9px; border: 1px solid var(--line); margin-top: 10px;
+  }
+  .band-badge.tone-great{ color: var(--gold); border-color: var(--gold-dim); }
+  .band-badge.tone-good{ color: var(--pcb-green); border-color: var(--pcb-green-dim); }
+  .band-badge.tone-neutral{ color: var(--ink-dim); }
+  .band-badge.tone-bad{ color: var(--down); border-color: var(--line); }
+
   @media (max-width: 480px){
     .scenarios{ grid-template-columns: 1fr; }
     .index-value{ font-size: 13px; }
@@ -180,6 +205,7 @@
   <div class="main-tabs">
     <button class="main-tab active" data-tab="domestic">국내주식</button>
     <button class="main-tab" data-tab="overseas">해외주식</button>
+    <button class="main-tab" data-tab="closed">매도완료</button>
   </div>
 
   <div class="main-panel active" data-panel="domestic">
@@ -221,6 +247,10 @@
     <div id="board-overseas"></div>
   </div>
 
+  <div class="main-panel" data-panel="closed">
+    <div id="board-closed"></div>
+  </div>
+
 </div>
 
 <script>
@@ -258,11 +288,17 @@ const STOCKS = [
     entry:453.57, finalTP:480, bullTP:519, baseTP:360, bearTP:297 },
   { code:'BRK.B', name:'BRK.B', category:'해외주식', held:true, currency:'USD',
     entry:482.10, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
-  { code:'XOM', name:'XOM', category:'해외주식', held:true, currency:'USD',
-    entry:136.28, finalTP:null, bullTP:150, baseTP:139, bearTP:123 },
 
   { code:'DRAM', name:'DRAM (ETF)', category:'해외ETF', held:true, currency:'USD',
     entry:51.20, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
+];
+
+// 매도 완료된 종목. exit(매도가), exitDate(매도일)만 채우면 자동으로
+// BEAR/BASE/BULL 구간 어디서 팔았는지 계산해서 보여줌.
+const CLOSED = [
+  { code:'XOM', name:'XOM', category:'해외주식', currency:'USD',
+    entry:153.82, exit:157.62, exitDate:'2026-07-24',
+    finalTP:null, bullTP:150, baseTP:139, bearTP:123 },
 ];
 
 let latestPriceData = null;
@@ -407,6 +443,74 @@ function renderCard(stock){
   </details>`;
 }
 
+function tpBandInfo(stock){
+  const { entry, exit, bearTP, baseTP, bullTP } = stock;
+  const pctReturn = ((exit - entry) / entry) * 100;
+
+  if (bearTP == null || baseTP == null || bullTP == null){
+    return { bandText: null, pctReturn };
+  }
+  let bandText, tone;
+  if (exit < bearTP){ bandText = 'BEAR TP 미만에서 매도'; tone = 'bad'; }
+  else if (exit < baseTP){ bandText = 'BEAR~BASE 구간에서 매도'; tone = 'neutral'; }
+  else if (exit < bullTP){ bandText = 'BASE~BULL 구간에서 매도'; tone = 'good'; }
+  else { bandText = 'BULL TP 초과해서 매도'; tone = 'great'; }
+  return { bandText, tone, pctReturn };
+}
+
+function renderClosedCard(stock){
+  const hasBand = stock.bearTP != null && stock.baseTP != null && stock.bullTP != null;
+  const info = tpBandInfo(stock);
+  const up = info.pctReturn >= 0;
+
+  let gaugeHTML = '';
+  if (hasBand){
+    gaugeHTML = `
+      <div class="gauge">
+        <div class="gauge-fill" style="width:${pos(stock, stock.exit)}%"></div>
+        <div class="exit-pointer" style="left:${pos(stock, stock.exit)}%"><div class="tag">매도가</div></div>
+        ${stock.finalTP != null ? `<div class="gauge-marker tp" style="left:${pos(stock, stock.finalTP)}%"><div class="tag"><span class="k">최종 TP</span><span class="v">${short(stock.finalTP, stock.currency)}</span></div></div>` : ''}
+        <div class="gauge-marker" style="left:${pos(stock, stock.bearTP)}%"><div class="tag"><span class="k">BEAR</span><span class="v">${short(stock.bearTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:${pos(stock, stock.baseTP)}%"><div class="tag"><span class="k">BASE</span><span class="v">${short(stock.baseTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:100%"><div class="tag"><span class="k">BULL</span><span class="v">${short(stock.bullTP, stock.currency)}</span></div></div>
+      </div>`;
+  }
+
+  return `
+  <details class="chip">
+    <summary>
+      <div class="sum-top">
+        <div class="sum-left">
+          <div class="sum-name">${stock.name} <span class="sum-code">${stock.code}</span></div>
+          <div class="sum-status"><span class="status-dot" style="background:var(--ink-faint);animation:none;box-shadow:none;"></span>매도완료 · ${stock.exitDate}</div>
+        </div>
+        <div class="sum-right"><div class="chevron"></div></div>
+      </div>
+      <div class="price-tp-row">
+        <div class="ptr-block">
+          <div class="ptr-label">매입가 → 매도가</div>
+          <div class="ptr-value">${fmtPrice(stock, stock.entry)} → ${fmtPrice(stock, stock.exit)}</div>
+          <div class="ptr-sub" style="color:${up?'var(--up)':'var(--down)'}">실현 ${up?'▲ +':'▼ '}${Math.abs(info.pctReturn).toFixed(1)}%</div>
+        </div>
+      </div>
+      ${info.bandText ? `<span class="band-badge tone-${info.tone}">${info.bandText}</span>` : ''}
+    </summary>
+    <div class="body">
+      ${gaugeHTML}
+    </div>
+  </details>`;
+}
+
+function renderClosedBoard(){
+  const board = document.getElementById('board-closed');
+  if (!board) return;
+  if (CLOSED.length === 0){
+    board.innerHTML = `<div class="closed-empty">아직 등록된 매도 내역이 없어요.<br>매도한 종목 정보를 알려주면 여기 채워질 거예요.</div>`;
+    return;
+  }
+  board.innerHTML = `<div class="board">` + CLOSED.map(renderClosedCard).join('') + `</div>`;
+}
+
 function renderBoardInto(containerId, categories, sortMode){
   const board = document.getElementById(containerId);
   const groups = [
@@ -427,6 +531,7 @@ function renderBoardInto(containerId, categories, sortMode){
 function renderAllBoards(){
   renderBoardInto('board-domestic', ['국내주식','국내ETF'], sortState.domestic);
   renderBoardInto('board-overseas', ['해외주식','해외ETF'], sortState.overseas);
+  renderClosedBoard();
   applyLiveDataToBoards();
 }
 
