@@ -185,6 +185,21 @@
   .band-badge.tone-neutral{ color: var(--ink-dim); }
   .band-badge.tone-bad{ color: var(--down); border-color: var(--line); }
 
+  .calibration{
+    margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line);
+  }
+  .calibration-title{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.14em;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 8px;
+  }
+  .calibration-text{
+    font-family:'Pretendard', sans-serif; font-size: 13px; line-height: 1.6; color: var(--ink-dim);
+    white-space: pre-line;
+  }
+  .calibration-empty{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); font-style: italic;
+  }
+
   @media (max-width: 480px){
     .scenarios{ grid-template-columns: 1fr; }
     .index-value{ font-size: 13px; }
@@ -298,7 +313,8 @@ const STOCKS = [
 const CLOSED = [
   { code:'XOM', name:'XOM', category:'해외주식', currency:'USD',
     entry:153.82, exit:157.62, exitDate:'2026-07-24',
-    finalTP:null, bullTP:150, baseTP:139, bearTP:123 },
+    finalTP:null, bullTP:150, baseTP:139, bearTP:123,
+    note:'유가가 주가에 미치는 영향 확인해 봄. 관심삼아 들어갔지만, 그 후에 적정 TP 돌려보니 이미 비싼 금액대임. 포기하고 있었는데, 트럼프가 전쟁 연기해주면서 탈출 기회 줌. 탈출 기회 줄 때, 나가자!' },
 ];
 
 let latestPriceData = null;
@@ -465,14 +481,22 @@ function renderClosedCard(stock){
 
   let gaugeHTML = '';
   if (hasBand){
+    const points = [stock.entry, stock.exit, stock.bearTP, stock.baseTP, stock.bullTP];
+    if (stock.finalTP != null) points.push(stock.finalTP);
+    const min = Math.min(...points);
+    const max = Math.max(...points);
+    const range = (max - min) || 1;
+    const p = v => Math.max(0, Math.min(100, ((v - min) / range) * 100));
+
     gaugeHTML = `
       <div class="gauge">
-        <div class="gauge-fill" style="width:${pos(stock, stock.exit)}%"></div>
-        <div class="exit-pointer" style="left:${pos(stock, stock.exit)}%"><div class="tag">매도가</div></div>
-        ${stock.finalTP != null ? `<div class="gauge-marker tp" style="left:${pos(stock, stock.finalTP)}%"><div class="tag"><span class="k">최종 TP</span><span class="v">${short(stock.finalTP, stock.currency)}</span></div></div>` : ''}
-        <div class="gauge-marker" style="left:${pos(stock, stock.bearTP)}%"><div class="tag"><span class="k">BEAR</span><span class="v">${short(stock.bearTP, stock.currency)}</span></div></div>
-        <div class="gauge-marker" style="left:${pos(stock, stock.baseTP)}%"><div class="tag"><span class="k">BASE</span><span class="v">${short(stock.baseTP, stock.currency)}</span></div></div>
-        <div class="gauge-marker" style="left:100%"><div class="tag"><span class="k">BULL</span><span class="v">${short(stock.bullTP, stock.currency)}</span></div></div>
+        <div class="gauge-fill" style="width:${p(stock.exit)}%"></div>
+        <div class="gauge-marker" style="left:${p(stock.entry)}%"><div class="tag"><span class="k">매입가</span><span class="v">${short(stock.entry, stock.currency)}</span></div></div>
+        <div class="exit-pointer" style="left:${p(stock.exit)}%"><div class="tag">매도가</div></div>
+        ${stock.finalTP != null ? `<div class="gauge-marker tp" style="left:${p(stock.finalTP)}%"><div class="tag"><span class="k">최종 TP</span><span class="v">${short(stock.finalTP, stock.currency)}</span></div></div>` : ''}
+        <div class="gauge-marker" style="left:${p(stock.bearTP)}%"><div class="tag"><span class="k">BEAR</span><span class="v">${short(stock.bearTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:${p(stock.baseTP)}%"><div class="tag"><span class="k">BASE</span><span class="v">${short(stock.baseTP, stock.currency)}</span></div></div>
+        <div class="gauge-marker" style="left:${p(stock.bullTP)}%"><div class="tag"><span class="k">BULL</span><span class="v">${short(stock.bullTP, stock.currency)}</span></div></div>
       </div>`;
   }
 
@@ -497,6 +521,12 @@ function renderClosedCard(stock){
     </summary>
     <div class="body">
       ${gaugeHTML}
+      <div class="calibration">
+        <div class="calibration-title">Calibration · 복기</div>
+        ${stock.note
+          ? `<div class="calibration-text">${stock.note}</div>`
+          : `<div class="calibration-empty">아직 작성된 복기 메모가 없어요.</div>`}
+      </div>
     </div>
   </details>`;
 }
