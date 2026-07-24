@@ -122,22 +122,25 @@
   .sum-status.watch .status-dot{ background: var(--watch); animation: none; box-shadow:none; }
   @keyframes pulse{ 0%{ box-shadow: 0 0 0 0 rgba(62,163,107,.5); } 70%{ box-shadow: 0 0 0 5px rgba(62,163,107,0); } 100%{ box-shadow: 0 0 0 0 rgba(62,163,107,0); } }
 
-  .sum-right{ text-align:right; flex:none; display:flex; align-items:flex-start; gap:10px; }
-  .sum-price{ font-family:'IBM Plex Mono', monospace; font-size: 17px; font-weight:600; white-space:nowrap; }
-  .sum-price .unit{ font-size: 11px; color: var(--ink-dim); font-weight:400; }
-  .sum-change{ font-family:'IBM Plex Mono', monospace; font-size: 11px; margin-top: 2px; white-space:nowrap; }
+  .sum-right{ text-align:right; flex:none; }
   .chevron{ width: 9px; height: 9px; border-right: 1.5px solid var(--ink-faint); border-bottom: 1.5px solid var(--ink-faint); transform: rotate(-45deg); margin-top: 6px; transition: transform .18s ease; flex: none; }
   .chip[open] .chevron{ transform: rotate(45deg); margin-top: 2px; }
 
-  .mini-gauge{ position:relative; height: 4px; background:#0a120e; border:1px solid var(--line); margin-top: 12px; }
-  .mini-gauge-fill{ position:absolute; top:0; left:0; bottom:0; background: linear-gradient(90deg, var(--pcb-green-dim), var(--pcb-green)); }
-  .mini-gauge-tp{ position:absolute; top:-2px; width:1px; height:8px; background: var(--gold); }
+  .price-tp-row{ display:flex; gap: 14px; margin-top: 14px; }
+  .ptr-block{ flex:1; min-width:0; }
+  .ptr-label{ font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.06em; color: var(--ink-faint); margin-bottom: 3px; }
+  .ptr-value{ font-family:'IBM Plex Mono', monospace; font-size: 19px; font-weight:700; color: var(--ink); word-break: break-word; }
+  .ptr-value.gold{ color: var(--gold); }
+  .ptr-value .unit{ font-size: 11px; font-weight:400; color: var(--ink-dim); margin-left:2px; }
+  .ptr-sub{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; margin-top: 4px; color: var(--ink-faint); }
+  .ptr-sub.gold{ color: var(--gold); }
+  .ptr-sub.achieved{ color: var(--up); }
+  @media (max-width: 400px){ .price-tp-row{ flex-direction:column; gap:10px; } }
 
   .body{ padding: 4px 16px 18px; border-top: 1px dashed var(--line); margin-top: 12px; }
   .price-asof{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin: 10px 0 0; }
 
-  .gauge-label-row{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin: 18px 4px 8px; letter-spacing: .04em; }
-  .gauge{ position: relative; height: 6px; background: #0a120e; border: 1px solid var(--line); margin: 0 4px 46px; }
+  .gauge{ position: relative; height: 6px; background: #0a120e; border: 1px solid var(--line); margin: 24px 4px 46px; }
   .gauge-fill{ position:absolute; top:0; left:0; bottom:0; background: linear-gradient(90deg, var(--pcb-green-dim), var(--pcb-green)); }
   .gauge-marker{ position:absolute; top:-5px; width:1px; height: 16px; background: var(--ink-faint); }
   .gauge-marker .tag{ position:absolute; top: 22px; left:50%; transform: translateX(-50%); font-family:'IBM Plex Mono', monospace; font-size: 10px; white-space: nowrap; text-align:center; }
@@ -147,10 +150,6 @@
   .gauge-pointer{ position:absolute; top:-16px; width:0; height:0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--up); transform: translateX(-5px); }
   .gauge-pointer .tag{ position:absolute; top:-20px; left:50%; transform: translateX(-50%); font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--up); white-space:nowrap; font-weight:600; }
 
-  .info-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px; font-family:'IBM Plex Mono', monospace; font-size: 12px; }
-  .info-row .k{ color: var(--ink-faint); }
-  .info-row .v{ color: var(--ink); }
-
   .scenarios{ display:grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 4px; }
   .scenario{ border: 1px solid var(--line); padding: 10px 8px; text-align:center; background: rgba(255,255,255,0.015); }
   .scenario .k{ font-family:'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing:.08em; color: var(--ink-faint); margin-bottom:5px; }
@@ -159,12 +158,10 @@
   .scenario.bull .v{ color: var(--gold); }
   .scenario.bear .v{ color: var(--ink-dim); }
 
-  .bfooter{ margin-top: 14px; font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); }
   .no-tp-note{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin-top: 10px; }
 
   @media (max-width: 480px){
     .scenarios{ grid-template-columns: 1fr; }
-    .sum-price{ font-size: 15px; }
     .index-value{ font-size: 13px; }
   }
 </style>
@@ -334,18 +331,25 @@ function scenarioBox(cls, label, value, entry, currency){
   </div>`;
 }
 
+function tpGapInfo(stock, currentPrice){
+  if (stock.finalTP == null || currentPrice == null) return null;
+  const diff = stock.finalTP - currentPrice;
+  const pct = (diff / currentPrice) * 100;
+  if (diff > 0){
+    return { text: `TP까지 +${fmtPrice(stock, diff)} (+${pct.toFixed(1)}%)`, achieved: false };
+  }
+  return { text: `TP 달성! 초과 +${fmtPrice(stock, Math.abs(diff))} (+${Math.abs(pct).toFixed(1)}%)`, achieved: true };
+}
+
 function renderCard(stock){
   const hasTP = stock.bullTP != null;
   const hasEntry = stock.entry != null;
   const statusLabel = stock.watch ? '관심' : '진행중';
   const statusClass = stock.watch ? 'watch' : '';
-  const unit = stock.currency === 'USD' ? '$' : '원';
 
   let gaugeHTML = '';
-  let miniGaugeHTML = '';
   if (hasTP && hasEntry){
     gaugeHTML = `
-      <div class="gauge-label-row"><span>매입가</span><span>BULL TP</span></div>
       <div class="gauge" data-role="gauge">
         <div class="gauge-fill" data-role="fill" style="width:0%"></div>
         <div class="gauge-pointer" data-role="pointer" style="left:0%"><div class="tag">현재가</div></div>
@@ -354,16 +358,7 @@ function renderCard(stock){
         <div class="gauge-marker" style="left:${pos(stock, stock.baseTP)}%"><div class="tag"><span class="k">BASE</span><span class="v">${short(stock.baseTP, stock.currency)}</span></div></div>
         <div class="gauge-marker" style="left:100%"><div class="tag"><span class="k">BULL</span><span class="v">${short(stock.bullTP, stock.currency)}</span></div></div>
       </div>`;
-    miniGaugeHTML = `
-      <div class="mini-gauge">
-        <div class="mini-gauge-fill" data-role="mini-fill" style="width:0%"></div>
-        ${stock.finalTP != null ? `<div class="mini-gauge-tp" style="left:${pos(stock, stock.finalTP)}%"></div>` : ''}
-      </div>`;
   }
-
-  const infoHTML = hasEntry ? `
-    <div class="info-row"><span class="k">매입가</span><span class="v">${fmtPrice(stock, stock.entry)}</span></div>
-  ` : `<div class="no-tp-note">보유하지 않은 관심종목 — 목표주가만 참고용으로 등록됨</div>`;
 
   const scenariosHTML = hasTP ? `
     <div class="scenarios">
@@ -372,8 +367,24 @@ function renderCard(stock){
       ${scenarioBox('bull','BULL TP', stock.bullTP, stock.entry, stock.currency)}
     </div>` : `<div class="no-tp-note">등록된 목표주가 시나리오 없음 (ETF/현금성 보유)</div>`;
 
-  const footerHTML = (hasTP && stock.finalTP != null && hasEntry) ? `
-    <div class="bfooter">최종 TP ${fmtPrice(stock, stock.finalTP)} (매입가 대비 ${(((stock.finalTP - stock.entry)/stock.entry)*100).toFixed(1)}%)</div>` : '';
+  const noteHTML = !hasEntry ? `<div class="no-tp-note">보유하지 않은 관심종목 — 목표주가만 참고용으로 등록됨</div>` : '';
+
+  const gap = tpGapInfo(stock, hasEntry ? stock.entry : null);
+
+  const priceTpRowHTML = `
+    <div class="price-tp-row">
+      <div class="ptr-block">
+        <div class="ptr-label">현재가</div>
+        <div class="ptr-value" data-role="value">${hasEntry ? fmtPrice(stock, stock.entry) : '조회중'}</div>
+        <div class="ptr-sub" data-role="change">오늘 -</div>
+      </div>
+      ${gap ? `
+      <div class="ptr-block" data-role="tp-block">
+        <div class="ptr-label">최종 TP</div>
+        <div class="ptr-value gold">${fmtPrice(stock, stock.finalTP)}</div>
+        <div class="ptr-sub gold" data-role="tp-gap">${gap.text}</div>
+      </div>` : ''}
+    </div>`;
 
   return `
   <details class="chip ${stock.watch ? 'is-watch' : ''}" data-code="${stock.code}" data-entry="${stock.entry ?? ''}" data-bull="${stock.bullTP ?? ''}" data-currency="${stock.currency}">
@@ -383,22 +394,15 @@ function renderCard(stock){
           <div class="sum-name">${stock.name} <span class="sum-code">${stock.code}</span></div>
           <div class="sum-status ${statusClass}"><span class="status-dot"></span>${statusLabel}</div>
         </div>
-        <div class="sum-right">
-          <div>
-            <div class="sum-price"><span data-role="value">${hasEntry ? fmt(stock.entry) : '-'}</span><span class="unit">${unit}</span></div>
-            <div class="sum-change" data-role="change">오늘 -</div>
-          </div>
-          <div class="chevron"></div>
-        </div>
+        <div class="sum-right"><div class="chevron"></div></div>
       </div>
-      ${miniGaugeHTML}
+      ${priceTpRowHTML}
     </summary>
     <div class="body">
       <div class="price-asof" data-role="asof">${hasEntry ? '고정값 · 자동갱신 대기중' : ''}</div>
       ${gaugeHTML}
-      ${infoHTML}
+      ${noteHTML}
       ${scenariosHTML}
-      ${footerHTML}
     </div>
   </details>`;
 }
@@ -483,14 +487,22 @@ function applyLiveDataToBoards(){
     const dailyUp = live.change_rate >= 0;
 
     const valueEl = chip.querySelector('[data-role="value"]');
-    if (valueEl) valueEl.textContent = currency === 'USD'
-      ? price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      : fmt(price);
+    if (valueEl) valueEl.textContent = fmtPrice(stockDef || { currency }, price);
 
     const changeEl = chip.querySelector('[data-role="change"]');
     if (changeEl) {
       changeEl.textContent = '오늘 ' + (dailyUp ? '▲ +' : '▼ ') + Math.abs(live.change_rate).toFixed(1) + '%';
       changeEl.style.color = dailyUp ? 'var(--up)' : 'var(--down)';
+    }
+
+    const gapEl = chip.querySelector('[data-role="tp-gap"]');
+    if (gapEl && stockDef){
+      const gap = tpGapInfo(stockDef, price);
+      if (gap){
+        gapEl.textContent = gap.text;
+        gapEl.classList.toggle('achieved', gap.achieved);
+        gapEl.classList.toggle('gold', !gap.achieved);
+      }
     }
 
     const asofEl = chip.querySelector('[data-role="asof"]');
@@ -503,7 +515,7 @@ function applyLiveDataToBoards(){
     if (entry && stockDef && stockDef.bullTP){
       const range = stockDef.bullTP - entry;
       const p = Math.max(0, Math.min(100, ((price - entry) / range) * 100));
-      chip.querySelectorAll('[data-role="fill"], [data-role="mini-fill"]').forEach(el => el.style.width = p + '%');
+      chip.querySelectorAll('[data-role="fill"]').forEach(el => el.style.width = p + '%');
       const pointerEl = chip.querySelector('[data-role="pointer"]');
       if (pointerEl) pointerEl.style.left = p + '%';
     }
