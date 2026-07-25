@@ -200,6 +200,49 @@
     font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); font-style: italic;
   }
 
+  /* ---- 적립비교 ---- */
+  .dca-compare{
+    border: 1px solid var(--line); background: var(--bg-raised);
+    padding: 14px 16px; margin-bottom: 14px; text-align:center;
+    font-family:'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--ink-dim);
+  }
+  .dca-compare b{ color: var(--gold); }
+
+  .dca-chart-box{
+    border: 1px solid var(--line); background: var(--bg-raised);
+    padding: 14px 14px 10px; margin-bottom: 14px;
+  }
+  .dca-chart-header{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom: 10px; flex-wrap:wrap; }
+  .dca-chart-title{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.08em;
+    color: var(--ink-faint); text-transform: uppercase;
+  }
+  .dca-chart-tabs{ display:flex; gap: 4px; }
+  .dca-chart-tab{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.02em;
+    background: transparent; color: var(--ink-faint); border: 1px solid var(--line);
+    padding: 5px 8px; cursor:pointer;
+  }
+  .dca-chart-tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.06); }
+  .dca-chart-canvas-wrap{ position: relative; height: 220px; width: 100%; }
+
+  .dca-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin: 14px 0 4px; }
+  .dca-grid .field .k{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-faint); margin-bottom: 4px; }
+  .dca-grid .field .v{ font-family:'IBM Plex Mono', monospace; font-size: 14px; color: var(--ink); }
+
+  .purchase-log{ margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .pl-title{
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.1em;
+    color: var(--ink-faint); text-transform: uppercase; margin-bottom: 8px;
+  }
+  .pl-row{
+    display:grid; grid-template-columns: 66px 1fr 36px 1fr;
+    gap: 8px; font-family:'IBM Plex Mono', monospace; font-size: 11px;
+    padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--ink-dim);
+  }
+  .pl-row:last-child{ border-bottom:none; }
+  .pl-row.head{ color: var(--ink-faint); font-size: 9.5px; text-transform:uppercase; }
+
   @media (max-width: 480px){
     .scenarios{ grid-template-columns: 1fr; }
     .index-value{ font-size: 13px; }
@@ -220,6 +263,7 @@
   <div class="main-tabs">
     <button class="main-tab active" data-tab="domestic">국내주식</button>
     <button class="main-tab" data-tab="overseas">해외주식</button>
+    <button class="main-tab" data-tab="dca">적립비교</button>
     <button class="main-tab" data-tab="closed">매도완료</button>
   </div>
 
@@ -262,12 +306,30 @@
     <div id="board-overseas"></div>
   </div>
 
+  <div class="main-panel" data-panel="dca">
+    <div class="dca-compare" id="dcaCompare">계산중...</div>
+    <div class="dca-chart-box">
+      <div class="dca-chart-header">
+        <div class="dca-chart-title" id="dcaChartTitle">첫 매수가 대비 가격 흐름</div>
+        <div class="dca-chart-tabs">
+          <button class="dca-chart-tab active" data-mode="price">가격 흐름</button>
+          <button class="dca-chart-tab" data-mode="avgcost">실제 수익률</button>
+        </div>
+      </div>
+      <div class="dca-chart-canvas-wrap">
+        <canvas id="dcaChartCanvas"></canvas>
+      </div>
+    </div>
+    <div id="board-dca"></div>
+  </div>
+
   <div class="main-panel" data-panel="closed">
     <div id="board-closed"></div>
   </div>
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const STOCKS = [
   { code:'000660', name:'SK하이닉스', category:'국내주식', held:true, currency:'KRW',
@@ -370,6 +432,9 @@ document.querySelectorAll('.main-tab').forEach(btn => {
     document.querySelectorAll('.main-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.querySelector(`.main-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+    if (btn.dataset.tab === 'dca'){
+      requestAnimationFrame(() => { if (dcaChartInstance) dcaChartInstance.resize(); });
+    }
   });
 });
 
@@ -531,6 +596,206 @@ function renderClosedCard(stock){
   </details>`;
 }
 
+// 적립식 매수 이력 (레버리지 vs 일반 나스닥100 비교용)
+const DCA_PLANS = [
+  { code:'418660', name:'TIGER 미국나스닥100레버리지(합성)', label:'2배 레버리지', currency:'KRW',
+    purchases: [
+      { date:'2026-05-20', price:46805, shares:1 },
+      { date:'2026-05-22', price:47050, shares:3 },
+      { date:'2026-05-28', price:50180, shares:4 },
+      { date:'2026-06-29', price:51610, shares:4 },
+      { date:'2026-07-24', price:41960, shares:5 },
+    ]},
+  { code:'133690', name:'TIGER 미국나스닥100', label:'일반(1배)', currency:'KRW',
+    purchases: [
+      { date:'2026-05-22', price:192970, shares:1 },
+      { date:'2026-05-28', price:199500, shares:1 },
+      { date:'2026-06-29', price:203830, shares:1 },
+      { date:'2026-07-24', price:184410, shares:1 },
+    ]},
+];
+
+function computeDcaStats(plan){
+  const totalShares = plan.purchases.reduce((s,p) => s + p.shares, 0);
+  const totalCost = plan.purchases.reduce((s,p) => s + p.shares * p.price, 0);
+  const avgPrice = totalCost / totalShares;
+  const live = latestPriceData && latestPriceData.stocks && latestPriceData.stocks[plan.code];
+  const currentPrice = live ? live.price : avgPrice;
+  const evalAmount = currentPrice * totalShares;
+  const pnlPct = ((evalAmount - totalCost) / totalCost) * 100;
+  return { totalShares, totalCost, avgPrice, currentPrice, evalAmount, pnlPct, hasLive: !!live };
+}
+
+function renderDcaCard(plan){
+  const stats = computeDcaStats(plan);
+  const up = stats.pnlPct >= 0;
+
+  const rows = plan.purchases.map(p => {
+    const amt = p.price * p.shares;
+    return `<div class="pl-row">
+      <span>${p.date.slice(5)}</span>
+      <span>${fmt(p.price)}원</span>
+      <span>${p.shares}주</span>
+      <span>${fmt(amt)}원</span>
+    </div>`;
+  }).join('');
+
+  return `
+  <details class="chip" data-dca-code="${plan.code}">
+    <summary>
+      <div class="sum-top">
+        <div class="sum-left">
+          <div class="sum-name">${plan.name} <span class="sum-code">${plan.code}</span></div>
+          <div class="sum-status"><span class="status-dot"></span>${plan.label} · ${plan.purchases.length}회 매수</div>
+        </div>
+        <div class="sum-right"><div class="chevron"></div></div>
+      </div>
+      <div class="price-tp-row">
+        <div class="ptr-block">
+          <div class="ptr-label">평균단가</div>
+          <div class="ptr-value">${fmt(stats.avgPrice)}원</div>
+        </div>
+        <div class="ptr-block">
+          <div class="ptr-label">현재가</div>
+          <div class="ptr-value" data-role="dca-price">${fmt(stats.currentPrice)}원</div>
+          <div class="ptr-sub" data-role="dca-pnl" style="color:${up?'var(--up)':'var(--down)'}">${stats.hasLive?'':'(고정값) '}${up?'▲ +':'▼ '}${Math.abs(stats.pnlPct).toFixed(1)}%</div>
+        </div>
+      </div>
+    </summary>
+    <div class="body">
+      <div class="dca-grid">
+        <div class="field"><div class="k">총 매수수량</div><div class="v">${stats.totalShares}주</div></div>
+        <div class="field"><div class="k">총 투입금액</div><div class="v">${fmt(stats.totalCost)}원</div></div>
+        <div class="field"><div class="k">평가금액</div><div class="v" data-role="dca-eval">${fmt(stats.evalAmount)}원</div></div>
+        <div class="field"><div class="k">평가손익</div><div class="v" data-role="dca-gain" style="color:${up?'var(--up)':'var(--down)'}">${up?'+':''}${fmt(stats.evalAmount-stats.totalCost)}원</div></div>
+      </div>
+      <div class="purchase-log">
+        <div class="pl-title">매수 이력</div>
+        <div class="pl-row head"><span>날짜</span><span>단가</span><span>수량</span><span>금액</span></div>
+        ${rows}
+      </div>
+    </div>
+  </details>`;
+}
+
+let dcaChartInstance = null;
+let dcaChartMode = 'price';
+
+function buildDcaChart(){
+  const canvas = document.getElementById('dcaChartCanvas');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const dateSet = new Set();
+  DCA_PLANS.forEach(p => p.purchases.forEach(pu => dateSet.add(pu.date)));
+  const todayLabel = latestPriceData && latestPriceData.updated_at ? latestPriceData.updated_at.slice(0,10) : null;
+  if (todayLabel) dateSet.add(todayLabel);
+  const labels = Array.from(dateSet).sort();
+
+  const titleEl = document.getElementById('dcaChartTitle');
+  if (titleEl){
+    titleEl.textContent = dcaChartMode === 'price'
+      ? '첫 매수가 대비 가격 흐름 (순수 가격 움직임)'
+      : '그 시점까지의 평균단가 대비 실제 수익률';
+  }
+
+  const palette = ['#c9a227', '#3ea36b'];
+  const datasets = DCA_PLANS.map((plan, idx) => {
+    const priceByDate = {};
+    plan.purchases.forEach(pu => { priceByDate[pu.date] = pu.price; });
+    const live = latestPriceData && latestPriceData.stocks && latestPriceData.stocks[plan.code];
+    if (live && todayLabel) priceByDate[todayLabel] = live.price;
+
+    let data;
+    if (dcaChartMode === 'price'){
+      const firstPrice = plan.purchases[0].price;
+      data = labels.map(d => priceByDate[d] != null ? ((priceByDate[d] / firstPrice) - 1) * 100 : null);
+    } else {
+      // 그 시점까지의 누적 평균단가 대비 수익률 (매수할 때마다 평균단가가 바뀌는 계단식)
+      let cumShares = 0, cumCost = 0;
+      const avgCostByDate = {};
+      plan.purchases.forEach(pu => {
+        cumShares += pu.shares;
+        cumCost += pu.shares * pu.price;
+        avgCostByDate[pu.date] = cumCost / cumShares;
+      });
+      const finalAvgCost = cumCost / cumShares;
+      data = labels.map(d => {
+        if (avgCostByDate[d] != null){
+          return ((priceByDate[d] / avgCostByDate[d]) - 1) * 100;
+        }
+        if (d === todayLabel && priceByDate[d] != null){
+          return ((priceByDate[d] / finalAvgCost) - 1) * 100;
+        }
+        return null;
+      });
+    }
+
+    return {
+      label: plan.label,
+      data,
+      borderColor: palette[idx % palette.length],
+      backgroundColor: palette[idx % palette.length],
+      spanGaps: true,
+      tension: 0.25,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+    };
+  });
+
+  if (dcaChartInstance) dcaChartInstance.destroy();
+  dcaChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels: labels.map(d => d.slice(5)), datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#9aa79c', font: { family: "'IBM Plex Mono', monospace", size: 10 }, boxWidth: 10 } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ctx.dataset.label + ': ' + (ctx.parsed.y >= 0 ? '+' : '') + ctx.parsed.y.toFixed(1) + '%'
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#5f6d64', font: { family: "'IBM Plex Mono', monospace", size: 9 } }, grid: { color: '#1c2b23' } },
+        y: { ticks: { color: '#5f6d64', font: { family: "'IBM Plex Mono', monospace", size: 9 }, callback: v => v + '%' }, grid: { color: '#1c2b23' } }
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.dca-chart-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dca-chart-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    dcaChartMode = btn.dataset.mode;
+    buildDcaChart();
+  });
+});
+
+function renderDcaBoard(){
+  const board = document.getElementById('board-dca');
+  const compareEl = document.getElementById('dcaCompare');
+  if (!board) return;
+
+  board.innerHTML = `<div class="board">` + DCA_PLANS.map(renderDcaCard).join('') + `</div>`;
+
+  if (compareEl && DCA_PLANS.length === 2){
+    const s0 = computeDcaStats(DCA_PLANS[0]);
+    const s1 = computeDcaStats(DCA_PLANS[1]);
+    const diff = s0.pnlPct - s1.pnlPct;
+    const leaderName = diff >= 0 ? DCA_PLANS[0].label : DCA_PLANS[1].label;
+    const hasLive = s0.hasLive && s1.hasLive;
+    compareEl.innerHTML = `${DCA_PLANS[0].label} <b>${s0.pnlPct>=0?'+':''}${s0.pnlPct.toFixed(1)}%</b>
+      &nbsp;vs&nbsp; ${DCA_PLANS[1].label} <b>${s1.pnlPct>=0?'+':''}${s1.pnlPct.toFixed(1)}%</b>
+      <br>지금까지는 <b>${leaderName}</b>가 ${Math.abs(diff).toFixed(1)}%p 앞서고 있어요${hasLive ? '' : ' (일부 고정값 기준)'}`;
+  }
+
+  buildDcaChart();
+}
+
 function renderClosedBoard(){
   const board = document.getElementById('board-closed');
   if (!board) return;
@@ -561,6 +826,7 @@ function renderBoardInto(containerId, categories, sortMode){
 function renderAllBoards(){
   renderBoardInto('board-domestic', ['국내주식','국내ETF'], sortState.domestic);
   renderBoardInto('board-overseas', ['해외주식','해외ETF'], sortState.overseas);
+  renderDcaBoard();
   renderClosedBoard();
   applyLiveDataToBoards();
 }
@@ -696,6 +962,7 @@ fetch('./price.json?t=' + Date.now())
     latestPriceData = data;
     applyLiveDataToBoards();
     updateSummaries();
+    renderDcaBoard();
   })
   .catch(() => { console.warn('price.json 로드 실패 — 고정값 표시 중'); });
 </script>
