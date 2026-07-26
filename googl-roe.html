@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOOGL 적정가 산출근거 (ROE)</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/prop-types/prop-types.js"></script>
+<script crossorigin src="https://unpkg.com/react-is/umd/react-is.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  html, body { margin:0; padding:0; background:#060f1c; }
+  .back-link{
+    display:block; padding:12px 18px; font-family:monospace; font-size:12px;
+    color:#60a5fa; text-decoration:none; background:#0a1628; border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .back-link:hover{ text-decoration:underline; }
+  #load-status{
+    padding:16px; font-family:monospace; font-size:12px; color:#ef5350; display:none;
+  }
+</style>
+</head>
+<body>
+<a class="back-link" href="index.html">← TP 트래커로 돌아가기</a>
+<div id="load-status"></div>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+
+const CHART = [
+  { year: "FY25",  Bear: 35.7, Base: 35.7, Bull: 35.7 },
+  { year: "FY26E", Bear: 27.6, Base: 27.6, Bull: 27.6 },
+  { year: "FY27F", Bear: 24.2, Base: 24.2, Bull: 24.2 },
+  { year: "FY28F", Bear: 21.5, Base: 21.5, Bull: 21.5 },
+  { year: "FY29F", Bear: 14.0, Base: 20.0, Bull: 27.0 },
+  { year: "FY30F", Bear: 10.0, Base: 19.0, Bull: 29.0 },
+];
+
+function calcAvg(key) {
+  var vals = CHART.slice(1).map(function(r) { return r[key]; });
+  return (vals.reduce(function(a,b){return a+b;},0)/vals.length).toFixed(1);
+}
+
+const BEAR_REASONS = [
+  "CapEx $180~190B 부담 지속 — 감가상각비 급증으로 잉여현금흐름(FCF) 압박, ROE 분모(자본) 팽창",
+  "$84.75B 대규모 증자 — 신주 발행으로 EPS·ROE 희석 효과 (버크셔 $10B 투자 포함)",
+  "클라우드 경쟁 심화 — MS Azure·AWS 대비 점유율 확대 정체 시 마진 압박",
+  "영국 CMA 검색 행위규제(Conduct Rules) 등 규제 리스크 — 반독점 이슈로 광고 사업 제약",
+  "Waymo 로보택시 안전 이슈 재발 시 신사업 밸류에이션 타격",
+  "AI 검색 전환(AI Mode/Overview)이 광고 수익 카니발라이즈 — 전통 검색 광고 매출 잠식",
+  "TPU 외주 판매 계획 지연 — 2027년 실적 기여 불확실성",
+];
+
+const BASE_REASONS = [
+  "Google Cloud 매출 $200억(+63% y-y), 수주잔고 $4,620억(+92% q-q) 고성장 지속 (NH증권, 2026.04.30)",
+  "Piper Sandler: AI Search citation 데이터 기반 2027년 검색 매출 추정치 +5% 상향 (2026.06.01)",
+  "다우존스 산업지수 편입(2026.06.29, Verizon 대체) — 인덱스 펀드 매수 수급 유입",
+  "철저한 ROIC 원칙 하 CapEx 집행 — 무분별한 투자가 아닌 검증된 수요 기반 확장",
+  "SpaceX와 $30B AI 클라우드 계약, Anthropic과 $36B TPU 리스 구조 — 신규 대형 고객 확보",
+  "Agentic Commerce 확대 — UCP(범용 커머스 프로토콜)로 쇼핑 생태계 가속화",
+  "TPU 외부 판매 2026년 하반기 개시, 2027년 본격 실적 기여 전망",
+];
+
+const BULL_REASONS = [
+  "AI Search 수익화가 예상보다 빠르게 진행 — 검색 광고 커버리지 상단 돌파(과거 20% 한계 초월)",
+  "Google Cloud 800% 성장 중인 생성형 AI 솔루션 수요 — 클라우드 마진 32.9%→40%+ 확대",
+  "TPU 외부 판매 본격화로 엔비디아 대항마 지위 확보 — 반도체 매출 신규 축 형성",
+  "Gemini 3 기반 풀스택 AI 경쟁력으로 MS·아마존 대비 비용 효율성 압도적 우위",
+  "Waymo 주간 50만+ 라이드 달성 후 상업화 가속 — 신사업 밸류에이션 재평가",
+  "다우존스 편입 + 실적 서프라이즈 지속 시 PER 35배+ 리레이팅 (현재 29.6배)",
+  "자사주 매입 확대 + 배당 성장(전년比 +4.8%) — 주주환원으로 ROE 방어",
+];
+
+const ROE_TABS = [
+  { key:"Bear", label:"🐻 Bear", color:"#f87171", title:"CapEx 부담 + 증자 희석 + 규제 리스크 + AI 카니발라이제이션", reasons:BEAR_REASONS },
+  { key:"Base", label:"📊 Base", color:"#60a5fa", title:"클라우드 고성장 지속 + ROIC 원칙 + 다우존스 편입", reasons:BASE_REASONS },
+  { key:"Bull", label:"🐂 Bull", color:"#4ade80", title:"AI Search 수익화 가속 + TPU 외판 본격화 + 클라우드 마진 확대", reasons:BULL_REASONS },
+];
+
+const BROKERS = [
+  ["Piper Sandler (Thomas Champion)","$445","2026.06.01","AI Search citation 데이터 기반, 2027 검색매출 +5% 상향, overweight 유지","#4ade80",100],
+  ["컨센서스 평균 (54개 분석사)","$427~433","2026.07 기준","44개 Strong Buy, 4개 Moderate Buy, 6개 Hold","#60a5fa",96],
+  ["Wells Fargo","$387","2026.02.23","equal-weight→상향 조정, 실적 서프라이즈 반영","#a78bfa",87],
+  ["Freedom Broker","$400","2026.05.04","$365→$400 하향 조정(타 대비 유일한 다운그레이드)","#f97316",90],
+  ["NH투자증권 (고민성)","$395.0","2026.04.30","컨센서스 반영. 클라우드 고성장 독보적 AI 수익화 역량 강조","#fbbf24",89],
+];
+
+function App() {
+  var [tab, setTab] = useState("Base");
+  var current = ROE_TABS.filter(function(t){return t.key===tab;})[0];
+
+  return (
+    <div style={{minHeight:"100vh",background:"#060f1c",color:"#e2e8f0",fontFamily:"Georgia,serif",padding:"28px 18px"}}>
+      <div style={{maxWidth:820,margin:"0 auto"}}>
+
+        <div style={{marginBottom:6}}>
+          <div style={{fontSize:10,color:"#475569",letterSpacing:2,marginBottom:4}}>NH증권 + 글로벌 IB 다수 리포트 통합 · 2026.07.15 최신판</div>
+          <div style={{fontSize:22,fontWeight:900,color:"#f1f5f9"}}>Alphabet Class A (GOOGL.US)</div>
+          <div style={{fontSize:13,color:"#475569",marginBottom:14}}>5개년 ROE 시나리오 · Bear / Base / Bull · 출처 검증판</div>
+        </div>
+
+        <div style={{background:"rgba(251,191,36,0.1)",border:"1px solid rgba(251,191,36,0.3)",borderRadius:10,padding:"12px 16px",marginBottom:14,fontSize:12}}>
+          <div style={{color:"#fbbf24",fontWeight:800,marginBottom:4}}>🔥 최신 팩트 (2026.07.15 기준)</div>
+          <div style={{color:"#94a3b8",lineHeight:1.6}}>
+            현재가 ~$385~398 · 다우존스 산업지수 편입(6/29, Verizon 대체) · 컨센 목표가 $393~433 (54개 분석사 중 44개 Strong Buy) · 2Q26 실적 발표 임박(EPS $2.86 예상, +24% YoY)
+          </div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+          {[
+            ["NH 리포트 기준가","$349.9","2026.04.29"],
+            ["현재가","~$385~398","2026.07 기준"],
+            ["컨센 목표가","$427~433","54개 분석사"],
+            ["Cloud 백로그","$4,600억+","1Q26 +92%q-q"],
+          ].map(function(item){
+            return (
+              <div key={item[0]} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"10px 6px",textAlign:"center"}}>
+                <div style={{fontSize:9,color:"#475569",marginBottom:4}}>{item[0]}</div>
+                <div style={{fontSize:13,fontWeight:900,color:item[0]==="컨센 목표가"?"#4ade80":item[0]==="현재가"?"#fbbf24":"#e2e8f0"}}>{item[1]}</div>
+                <div style={{fontSize:9,color:"#334155",marginTop:2}}>{item[2]}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"14px 16px",marginBottom:14}}>
+          <div style={{fontSize:11,color:"#60a5fa",fontWeight:700,marginBottom:10}}>📋 주요 증권사 목표주가 비교</div>
+          <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {BROKERS.map(function(item){
+              return (
+                <div key={item[0]}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:3}}>
+                    <div style={{fontSize:11,color:"#64748b",minWidth:150}}>{item[0]}</div>
+                    <div style={{flex:1,background:"rgba(255,255,255,0.05)",borderRadius:4,height:12,overflow:"hidden"}}>
+                      <div style={{width:item[5]+"%",height:"100%",background:item[4],borderRadius:4}}/>
+                    </div>
+                    <div style={{fontSize:12,fontWeight:800,color:item[4],minWidth:70,textAlign:"right"}}>{item[1]}</div>
+                    <div style={{fontSize:9,color:"#334155",minWidth:65}}>{item[2]}</div>
+                  </div>
+                  <div style={{fontSize:10,color:"#334155",paddingLeft:160,marginBottom:2}}>{item[3]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{background:"rgba(96,165,250,0.05)",border:"1px solid rgba(96,165,250,0.15)",borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+          <div style={{fontSize:11,color:"#60a5fa",fontWeight:700,marginBottom:10}}>💰 대규모 AI 인프라 자금조달 구조 (2026년)</div>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {[
+              ["$84.75B", "지분 증자 — 버크셔 해서웨이 $10B 투자 포함"],
+              ["$180~190B", "2026년 연간 CapEx (기존 대비 $50억 상향)"],
+              ["$30B", "SpaceX와 AI 클라우드 계약 체결"],
+              ["$36B", "Anthropic TPU 리스 구조 계약"],
+            ].map(function(item, i){
+              var colors = ["#fbbf24","#f87171","#60a5fa","#4ade80"];
+              return (
+                <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+                  <div style={{minWidth:90,fontSize:12,color:colors[i],fontWeight:800,paddingTop:1}}>{item[0]}</div>
+                  <div style={{fontSize:12,color:"#94a3b8"}}>{item[1]}</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{fontSize:10,color:"#334155",marginTop:8}}>출처: Simply Wall St (2026.07 기준). 증자로 인한 희석 효과와 CapEx 압박이 Bear 시나리오의 핵심 근거</div>
+        </div>
+
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"18px 6px 12px",marginBottom:18}}>
+          <div style={{fontSize:10,color:"#475569",marginBottom:10,paddingLeft:8}}>ROE (%) · FY25 실적 / FY26~28 NH증권 추정 / FY29~30 시나리오 · 12월 결산</div>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={CHART} margin={{top:4,right:14,left:-8,bottom:4}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
+              <XAxis dataKey="year" tick={{fill:"#475569",fontSize:11}} axisLine={false} tickLine={false}/>
+              <YAxis tick={{fill:"#475569",fontSize:10}} axisLine={false} tickLine={false} tickFormatter={function(v){return v+"%";}} domain={[6,40]}/>
+              <Tooltip contentStyle={{background:"#0a1628",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:12}} labelStyle={{color:"#64748b"}} formatter={function(v){return v.toFixed(1)+"%";}}/>
+              <Legend wrapperStyle={{fontSize:12,paddingTop:10}}/>
+              <Line type="monotone" dataKey="Bear" stroke="#f87171" strokeWidth={tab==="Bear"?3:1.5} dot={{r:tab==="Bear"?5:3,fill:"#f87171"}} opacity={tab==="Bear"?1:0.35}/>
+              <Line type="monotone" dataKey="Base" stroke="#60a5fa" strokeWidth={tab==="Base"?3:1.5} dot={{r:tab==="Base"?5:3,fill:"#60a5fa"}} opacity={tab==="Base"?1:0.35}/>
+              <Line type="monotone" dataKey="Bull" stroke="#4ade80" strokeWidth={tab==="Bull"?3:1.5} dot={{r:tab==="Bull"?5:3,fill:"#4ade80"}} opacity={tab==="Bull"?1:0.35}/>
+            </LineChart>
+          </ResponsiveContainer>
+          <div style={{fontSize:10,color:"#475569",textAlign:"center",marginTop:4}}>ROE가 FY25 35.7% → FY28F 21.5%로 지속 하락하는 이유: CapEx 급증 + 자기자본 팽창 (증자 등)</div>
+        </div>
+
+        <div style={{display:"flex",gap:8,marginBottom:14}}>
+          {ROE_TABS.map(function(t){
+            return <button key={t.key} onClick={function(){setTab(t.key);}} style={{flex:1,padding:"9px 4px",borderRadius:8,cursor:"pointer",fontFamily:"inherit",fontSize:13,border:"1.5px solid "+(tab===t.key?t.color:"rgba(255,255,255,0.08)"),background:tab===t.key?"rgba(255,255,255,0.06)":"rgba(255,255,255,0.02)",color:tab===t.key?t.color:"#475569",fontWeight:tab===t.key?800:400}}>{t.label}</button>;
+          })}
+        </div>
+
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:"20px",marginBottom:18}}>
+          <div style={{fontSize:15,fontWeight:800,color:current.color,marginBottom:2}}>{current.label} Case</div>
+          <div style={{fontSize:12,color:"#64748b",marginBottom:16}}>{current.title}</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:6,background:"rgba(0,0,0,0.2)",borderRadius:10,padding:"12px 8px",marginBottom:8}}>
+            {CHART.map(function(row,i){
+              var isProj=i>=4; var isPeak=i===0;
+              return (
+                <div key={row.year} style={{textAlign:"center"}}>
+                  <div style={{fontSize:9,color:"#475569",marginBottom:4}}>{row.year}</div>
+                  <div style={{fontSize:isProj?18:16,fontWeight:900,color:isPeak?"#fbbf24":isProj?current.color:"#cbd5e1"}}>{row[tab].toFixed(1)}%</div>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{fontSize:10,color:"#334155",marginBottom:14}}>노란색 FY25 = 지금까지의 피크 | ★ FY29~30 시나리오 추정 | FY25~28 NH증권(2026.04.30) 추정</div>
+
+          {current.reasons.map(function(r,i){
+            return (
+              <div key={i} style={{display:"flex",gap:10,marginBottom:8,alignItems:"flex-start"}}>
+                <div style={{minWidth:20,height:20,borderRadius:"50%",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:current.color,fontWeight:800,flexShrink:0,marginTop:1}}>{i+1}</div>
+                <div style={{fontSize:13,color:"#cbd5e1",lineHeight:1.6}}>{r}</div>
+              </div>
+            );
+          })}
+
+          <div style={{marginTop:18,padding:"14px 16px",background:"rgba(0,0,0,0.3)",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:12,color:"#64748b"}}>5개년 평균 ROE (FY26~30)</div>
+              <div style={{fontSize:10,color:"#334155",marginTop:2}}>단순 평균 · 지배지분 기준</div>
+            </div>
+            <div style={{fontSize:30,fontWeight:900,color:current.color}}>{calcAvg(tab)}%</div>
+          </div>
+        </div>
+
+        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"18px",marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#e2e8f0",marginBottom:14}}>📋 케이스별 비교</div>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+            <thead><tr>{["","FY26E","FY27F","FY28F","FY29F★","FY30F★","5개년 평균"].map(function(h){return <th key={h} style={{padding:"6px 4px",textAlign:"center",color:"#334155",borderBottom:"1px solid rgba(255,255,255,0.06)",fontWeight:600,whiteSpace:"nowrap"}}>{h}</th>;})}</tr></thead>
+            <tbody>
+              {ROE_TABS.map(function(t){
+                return (
+                  <tr key={t.key} style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                    <td style={{padding:"8px 4px",color:t.color,fontWeight:800,textAlign:"center"}}>{t.label}</td>
+                    {CHART.slice(1).map(function(row,i){
+                      var isProj=i>=3;
+                      return <td key={row.year} style={{padding:"8px 4px",textAlign:"center",color:isProj?t.color:"#94a3b8",fontWeight:isProj?800:400}}>{row[t.key].toFixed(1)}%</td>;
+                    })}
+                    <td style={{padding:"8px 4px",textAlign:"center",color:t.color,fontWeight:900,fontSize:14}}>{calcAvg(t.key)}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div style={{fontSize:10,color:"#334155",marginTop:8}}>★ FY29~30은 시나리오 추정치</div>
+        </div>
+
+        <div style={{background:"rgba(96,165,250,0.06)",border:"1px solid rgba(96,165,250,0.2)",borderRadius:12,padding:"14px 18px",marginBottom:14}}>
+          <div style={{fontSize:12,fontWeight:700,color:"#60a5fa",marginBottom:6}}>💡 알파벳 ROE 예측의 핵심 변수</div>
+          <div style={{fontSize:12,color:"#94a3b8",lineHeight:1.75}}>
+            알파벳은 지금까지 분석한 종목 중 <strong style={{color:"#fbbf24"}}>ROE가 계속 하락하는 유일한 케이스</strong>입니다 (FY25 35.7% → FY28F 21.5%).
+            이유는 역설적으로 <strong style={{color:"#60a5fa"}}>돈을 너무 잘 벌어서</strong>입니다 — CapEx $180~190B와 $84.75B 대규모 증자로 자기자본이 급격히 불어나면서 ROE 분모가 커지는 구조입니다.
+            2029~2030의 핵심 변수는 <strong style={{color:"#4ade80"}}>AI Search 수익화 속도</strong>입니다. Piper Sandler는 citation 데이터를 근거로 검색 매출 추정치를 상향했고,
+            <strong style={{color:"#f87171"}}>Freedom Broker만 유일하게 목표가를 하향</strong>했는데 이는 CapEx 부담을 우려한 소수 의견입니다.
+          </div>
+        </div>
+
+        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+          <div style={{fontSize:11,color:"#475569",fontWeight:700,marginBottom:10}}>📎 전체 출처 목록</div>
+          {[
+            ["NH투자증권 (고민성 애널리스트)","2026.04.30","목표주가(컨센) $395.0, 현재가 $349.9. ROE FY26E 27.6%/FY27F 24.2%/FY28F 21.5%. 클라우드 매출 $200억(+63%)"],
+            ["Piper Sandler (Thomas Champion)","2026.06.01","목표가 $425→$445 상향, overweight 유지. AI Search citation 데이터로 2027 검색매출 +5% 상향"],
+            ["Barchart / TheStreet","2026.06.29~07.13","다우존스 산업지수 편입(6/29, Verizon 대체) +5% 상승. 컨센 목표가 $432.63(54개 분석사, Strong Buy 44개)"],
+            ["Benzinga","2026.06.01","목표가 범위 $425~445, 현재가 $375.97 대비 상승여력 존재"],
+            ["Simply Wall St","2026.07 기준","컨센 목표가 $443→$493.30 상향(일부 낙관론 반영). 다른 리포트에서는 $382→$427로도 집계"],
+            ["Public.com","2026.07.10~15","41개 분석사 기준 $393.44, 8개 분석사(GOOG) 기준 $399.38 — 소스마다 차이 존재"],
+          ].map(function(src){
+            return (
+              <div key={src[0]} style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,padding:"10px 12px",marginBottom:6}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                  <div style={{fontSize:11,color:"#60a5fa",fontWeight:700}}>{src[0]}</div>
+                  <div style={{fontSize:10,color:"#334155"}}>{src[1]}</div>
+                </div>
+                <div style={{fontSize:11,color:"#64748b",lineHeight:1.5}}>{src[2]}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{fontSize:10,color:"#1e293b",lineHeight:1.8}}>
+          ※ FY26~28 ROE는 NH투자증권(고민성, 2026.04.30) 추정치. FY29~30은 시나리오 추정. 컨센서스 목표가는 출처별로 $393~433 편차 존재하니 확인 시점 재검증 권장. 본 자료는 투자권유가 아닙니다.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const rootEl = document.getElementById('root');
+const statusEl = document.getElementById('load-status');
+if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+  statusEl.style.display = 'block';
+  statusEl.textContent = '차트 라이브러리 로드 실패 — 인터넷 연결을 확인하거나 새로고침 해보세요.';
+} else {
+  try {
+    ReactDOM.createRoot(rootEl).render(<App />);
+  } catch (err) {
+    statusEl.style.display = 'block';
+    statusEl.textContent = '렌더링 에러: ' + (err && err.message ? err.message : String(err));
+  }
+}
+</script>
+</body>
+</html>
