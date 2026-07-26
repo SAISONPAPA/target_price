@@ -6,9 +6,7 @@
 <title>GOOGL 적정가 산출근거 (ROE)</title>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/prop-types/prop-types.js"></script>
-<script crossorigin src="https://unpkg.com/react-is/umd/react-is.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
   html, body { margin:0; padding:0; background:#060f1c; }
@@ -28,8 +26,52 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState } = React;
-const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+const { useState, useRef, useEffect } = React;
+
+function ROEChart({ chartData, activeTab }) {
+  const canvasRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || typeof Chart === 'undefined') return;
+    if (chartInstanceRef.current) chartInstanceRef.current.destroy();
+
+    const palette = { Bear: '#f87171', Base: '#60a5fa', Bull: '#4ade80' };
+    chartInstanceRef.current = new Chart(canvasRef.current.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: chartData.map(function(r){ return r.year; }),
+        datasets: ['Bear', 'Base', 'Bull'].map(function(key){
+          return {
+            label: key,
+            data: chartData.map(function(r){ return r[key]; }),
+            borderColor: palette[key],
+            backgroundColor: palette[key],
+            borderWidth: activeTab === key ? 3 : 1.5,
+            pointRadius: activeTab === key ? 5 : 3,
+            opacity: activeTab === key ? 1 : 0.35,
+          };
+        }),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+          tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } },
+        },
+        scales: {
+          x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { min: 6, max: 40, ticks: { color: '#475569', font: { size: 9 }, callback: function(v){ return v + '%'; } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        },
+      },
+    });
+
+    return function cleanup(){ if (chartInstanceRef.current) chartInstanceRef.current.destroy(); };
+  }, [activeTab]);
+
+  return <canvas ref={canvasRef}></canvas>;
+}
 
 const CHART = [
   { year: "FY25",  Bear: 35.7, Base: 35.7, Bull: 35.7 },
@@ -171,18 +213,9 @@ function App() {
 
         <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:14,padding:"18px 6px 12px",marginBottom:18}}>
           <div style={{fontSize:10,color:"#475569",marginBottom:10,paddingLeft:8}}>ROE (%) · FY25 실적 / FY26~28 NH증권 추정 / FY29~30 시나리오 · 12월 결산</div>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={CHART} margin={{top:4,right:14,left:-8,bottom:4}}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)"/>
-              <XAxis dataKey="year" tick={{fill:"#475569",fontSize:11}} axisLine={false} tickLine={false}/>
-              <YAxis tick={{fill:"#475569",fontSize:10}} axisLine={false} tickLine={false} tickFormatter={function(v){return v+"%";}} domain={[6,40]}/>
-              <Tooltip contentStyle={{background:"#0a1628",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,fontSize:12}} labelStyle={{color:"#64748b"}} formatter={function(v){return v.toFixed(1)+"%";}}/>
-              <Legend wrapperStyle={{fontSize:12,paddingTop:10}}/>
-              <Line type="monotone" dataKey="Bear" stroke="#f87171" strokeWidth={tab==="Bear"?3:1.5} dot={{r:tab==="Bear"?5:3,fill:"#f87171"}} opacity={tab==="Bear"?1:0.35}/>
-              <Line type="monotone" dataKey="Base" stroke="#60a5fa" strokeWidth={tab==="Base"?3:1.5} dot={{r:tab==="Base"?5:3,fill:"#60a5fa"}} opacity={tab==="Base"?1:0.35}/>
-              <Line type="monotone" dataKey="Bull" stroke="#4ade80" strokeWidth={tab==="Bull"?3:1.5} dot={{r:tab==="Bull"?5:3,fill:"#4ade80"}} opacity={tab==="Bull"?1:0.35}/>
-            </LineChart>
-          </ResponsiveContainer>
+          <div style={{height:250}}>
+            <ROEChart chartData={CHART} activeTab={tab} />
+          </div>
           <div style={{fontSize:10,color:"#475569",textAlign:"center",marginTop:4}}>ROE가 FY25 35.7% → FY28F 21.5%로 지속 하락하는 이유: CapEx 급증 + 자기자본 팽창 (증자 등)</div>
         </div>
 
@@ -290,7 +323,7 @@ function App() {
 
 const rootEl = document.getElementById('root');
 const statusEl = document.getElementById('load-status');
-if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+if (typeof Chart === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
   statusEl.style.display = 'block';
   statusEl.textContent = '차트 라이브러리 로드 실패 — 인터넷 연결을 확인하거나 새로고침 해보세요.';
 } else {
