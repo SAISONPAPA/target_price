@@ -205,6 +205,8 @@
     padding: 9px 14px; text-decoration:none;
   }
   .valuation-link:hover{ background: rgba(201,162,39,0.12); }
+  .valuation-frame-wrap{ display:none; margin-top: 10px; }
+  .valuation-frame-wrap iframe{ width:100%; height:900px; border:none; display:block; }
 
   /* ---- 적립비교 ---- */
   .dca-compare{
@@ -512,7 +514,8 @@ function renderCard(stock){
   const valuationHTML = stock.valuationLink ? `
     <div class="calibration">
       <div class="calibration-title">적정가 산출근거 (ROE)</div>
-      <a class="valuation-link" href="${stock.valuationLink}" target="_blank" rel="noopener">📊 적정가 산출근거 보기 (새 창)</a>
+      <button type="button" class="valuation-link" data-src="${stock.valuationLink}">📊 적정가 산출근거 보기</button>
+      <div class="valuation-frame-wrap"></div>
     </div>` : '';
 
   return `
@@ -861,6 +864,25 @@ document.querySelectorAll('.expand-all').forEach(btn => btn.addEventListener('cl
   document.querySelectorAll('.chip').forEach(d => d.open = true)));
 document.querySelectorAll('.collapse-all').forEach(btn => btn.addEventListener('click', () =>
   document.querySelectorAll('.chip').forEach(d => d.open = false)));
+
+document.querySelectorAll('.valuation-link').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const wrap = btn.nextElementSibling;
+    if (!wrap) return;
+    if (!wrap.dataset.loaded) {
+      const iframe = document.createElement('iframe');
+      iframe.src = btn.dataset.src;
+      wrap.appendChild(iframe);
+      wrap.dataset.loaded = 'true';
+      wrap.style.display = 'block';
+      btn.textContent = '📊 적정가 산출근거 접기';
+    } else {
+      const isOpen = wrap.style.display !== 'none';
+      wrap.style.display = isOpen ? 'none' : 'block';
+      btn.textContent = isOpen ? '📊 적정가 산출근거 보기' : '📊 적정가 산출근거 접기';
+    }
+  });
+});
 
 function updateIndexChip(container, name, indexData){
   if (!indexData) return;
