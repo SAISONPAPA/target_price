@@ -302,5 +302,26 @@ if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof Re
   }
 }
 </script>
+
+<script>
+  // Babel 스크립트 자체가 파싱/실행 중 죽어도 감지할 수 있는 바깥쪽 감시 코드
+  window.addEventListener('error', function (e) {
+    var el = document.getElementById('load-status');
+    if (el) {
+      el.style.display = 'block';
+      el.textContent = '스크립트 에러: ' + (e.message || '알 수 없는 에러') +
+        (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '');
+    }
+  });
+
+  setTimeout(function () {
+    var root = document.getElementById('root');
+    var el = document.getElementById('load-status');
+    if (root && root.children.length === 0 && el && el.style.display !== 'block') {
+      el.style.display = 'block';
+      el.textContent = '5초가 지나도 화면이 안 그려졌어요. Babel 변환 실패, CDN 로드 실패, 또는 GitHub Pages(Jekyll)가 코드를 변형했을 가능성이 있어요. "페이지 소스 보기"로 원본 확인 필요.';
+    }
+  }, 5000);
+</script>
 </body>
 </html>
