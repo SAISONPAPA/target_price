@@ -341,17 +341,23 @@
 <script>
 const STOCKS = [
   { code:'000660', name:'SK하이닉스', category:'국내주식', held:true, currency:'KRW',
-    entry:1678000, finalTP:3200000, bullTP:7033691, baseTP:5311644, bearTP:4294255 },
+    entry:1678000, finalTP:3200000, bullTP:7033691, baseTP:5311644, bearTP:4294255,
+    sellNote:'240만원 도달 시 50% 매도, 320만원 도달 시 나머지 50% 매도' },
   { code:'003230', name:'삼양식품', category:'국내주식', held:true, currency:'KRW',
-    entry:1090000, finalTP:1400000, bullTP:2328888, baseTP:1754923, bearTP:1353975 },
+    entry:1090000, finalTP:1400000, bullTP:2328888, baseTP:1754923, bearTP:1353975,
+    sellNote:'140만원 도달 시 전량 매도' },
   { code:'010120', name:'LS ELECTRIC', category:'국내주식', held:true, currency:'KRW',
-    entry:238100, finalTP:250000, bullTP:413166, baseTP:301835, bearTP:203552 },
+    entry:238100, finalTP:250000, bullTP:413166, baseTP:301835, bearTP:203552,
+    sellNote:'25만원 도달 시 전량 매도' },
   { code:'071050', name:'한국금융지주', category:'국내주식', held:true, currency:'KRW',
-    entry:234857, finalTP:400000, bullTP:993649, baseTP:886674, bearTP:808186 },
+    entry:234857, finalTP:400000, bullTP:993649, baseTP:886674, bearTP:808186,
+    sellNote:'30만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도' },
   { code:'316140', name:'우리금융지주', category:'국내주식', held:true, currency:'KRW',
-    entry:33250, finalTP:40000, bullTP:81243, baseTP:74947, bearTP:69068 },
+    entry:33250, finalTP:40000, bullTP:81243, baseTP:74947, bearTP:69068,
+    sellNote:'36,500원 도달 시 50% 매도, 40,000원 도달 시 나머지 50% 매도' },
   { code:'005930', name:'삼성전자', category:'국내주식', held:true, currency:'KRW',
-    entry:290000, finalTP:400000, bullTP:537358, baseTP:349001, bearTP:243589 },
+    entry:290000, finalTP:400000, bullTP:537358, baseTP:349001, bearTP:243589,
+    sellNote:'35만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도' },
 
   { code:'003490', name:'대한항공', category:'국내주식', held:false, watch:true, currency:'KRW',
     entry:null, finalTP:null, bullTP:38204, baseTP:33942, bearTP:29125 },
@@ -518,6 +524,14 @@ function renderCard(stock){
       <div class="valuation-frame-wrap"></div>
     </div>` : '';
 
+  const sellStrategyHTML = (hasTP && hasEntry) ? `
+    <div class="calibration">
+      <div class="calibration-title">매도 전략</div>
+      ${stock.sellNote
+        ? `<div class="calibration-text">${stock.sellNote}</div>`
+        : `<div class="calibration-empty">아직 작성된 매도 전략이 없어요.</div>`}
+    </div>` : '';
+
   return `
   <details class="chip ${stock.watch ? 'is-watch' : ''}" data-code="${stock.code}" data-entry="${stock.entry ?? ''}" data-bull="${stock.bullTP ?? ''}" data-currency="${stock.currency}">
     <summary>
@@ -535,6 +549,7 @@ function renderCard(stock){
       ${gaugeHTML}
       ${noteHTML}
       ${scenariosHTML}
+      ${sellStrategyHTML}
       ${valuationHTML}
     </div>
   </details>`;
