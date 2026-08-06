@@ -371,8 +371,6 @@ const STOCKS = [
   { code:'133690', name:'TIGER 미국나스닥100', category:'국내ETF', held:true, currency:'KRW',
     entry:198766, finalTP:null, bullTP:null, baseTP:null, bearTP:null },
 
-  { code:'GOOGL', name:'GOOGL', category:'해외주식', held:true, currency:'USD',
-    entry:228.79, finalTP:380, bullTP:463, baseTP:320, bearTP:263, valuationLink:'googl-roe.html' },
   { code:'UBER', name:'UBER', category:'해외주식', held:true, currency:'USD',
     entry:92.00, finalTP:130, bullTP:168, baseTP:115, bearTP:86 },
   { code:'BRK.B', name:'BRK.B', category:'해외주식', held:true, currency:'USD',
@@ -393,6 +391,10 @@ const CLOSED = [
     entry:453.57, exit:490, exitDate:'2026-08-03',
     finalTP:480, bullTP:519, baseTP:360, bearTP:297,
     note:'마소가 망할 리가 있겠냐 해서 들어갔는데, 추가 매수 시점의 평단이 너무 높았다. 마이크로소프트가 하루에 20% 정도 빠졌던 최악의 날에 들어갔었고, 그게 아니었으면 실현 수익은 더 높았을 듯. Azure 수익률도 높고 하지만... 사실 AI 시대에 Copilot을 써본 적이 없다. 애널리스트 평균 목표주가는 $560이지만, 일단 나는 아웃.' },
+  { code:'GOOGL', name:'GOOGL', category:'해외주식', currency:'USD',
+    entry:228.79, exit:381, exitDate:'2026-08-03',
+    finalTP:380, bullTP:463, baseTP:320, bearTP:263,
+    note:'목표가 380달러 달성. 지난번에도 달성했었고 390달러까지 갔지만 팔지 못했음. 상승할 수도 있다는 생각은 들지만, 여전히 지속적인 CAPEX와 줄어드는 FCF, 그리고 AI 세계에서 밀려나는 Gemini까지 불편한 점도 있다는 건 부정할 수 없는 사실. 클라우드와 광고 수익은 계속 늘어나지만 CAPEX가 더 늘어나는 게 무서운 듯함. 여전히 좋은 주식이라 생각하지만, 매수할 자리는 아니고 매도가 가까운 듯. Good bye.' },
 ];
 
 let latestPriceData = null;
