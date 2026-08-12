@@ -1,17 +1,17 @@
 {
-  "updated_at": "2026-08-12T02:28:23.320929+00:00",
+  "updated_at": "2026-08-12T04:24:32.277592+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1502000,
-      "change": 77000,
-      "change_rate": 5.4
+      "price": 1520000,
+      "change": 95000,
+      "change_rate": 6.67
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1215000,
-      "change": -39000,
-      "change_rate": -3.11
+      "price": 1213000,
+      "change": -41000,
+      "change_rate": -3.27
     },
     "010120": {
       "name": "LS ELECTRIC",
@@ -21,21 +21,21 @@
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 200500,
-      "change": 2400,
-      "change_rate": 1.21
+      "price": 201500,
+      "change": 3400,
+      "change_rate": 1.72
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 33350,
-      "change": -450,
-      "change_rate": -1.33
+      "price": 33150,
+      "change": -650,
+      "change_rate": -1.92
     },
     "005930": {
       "name": "삼성전자",
-      "price": 255000,
-      "change": 15500,
-      "change_rate": 6.47
+      "price": 257500,
+      "change": 18000,
+      "change_rate": 7.52
     },
     "360750": {
       "name": "TIGER 미국S&P500",
@@ -45,27 +45,27 @@
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 42390,
-      "change": -300,
-      "change_rate": -0.7
+      "price": 42465,
+      "change": -225,
+      "change_rate": -0.53
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 185235,
-      "change": -590,
-      "change_rate": -0.32
+      "price": 185280,
+      "change": -545,
+      "change_rate": -0.29
     },
     "003490": {
       "name": "대한항공",
-      "price": 26700,
-      "change": 50,
-      "change_rate": 0.19
+      "price": 26550,
+      "change": -100,
+      "change_rate": -0.38
     },
     "016360": {
       "name": "삼성증권",
-      "price": 93800,
-      "change": 1100,
-      "change_rate": 1.19
+      "price": 93700,
+      "change": 1000,
+      "change_rate": 1.08
     },
     "GOOGL": {
       "price": 343.8,
@@ -106,14 +106,14 @@
   },
   "indices": {
     "KOSPI": {
-      "price": 6584.24,
-      "change": 238.71,
-      "change_rate": 3.76
+      "price": 6616.59,
+      "change": 271.06,
+      "change_rate": 4.27
     },
     "KOSDAQ": {
-      "price": 856.73,
-      "change": -1.11,
-      "change_rate": -0.13
+      "price": 858.39,
+      "change": 0.55,
+      "change_rate": 0.06
     },
     "SPX": {
       "price": 7728.2,
