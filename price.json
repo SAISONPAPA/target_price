@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-08-18T04:19:34.089691+00:00",
+  "updated_at": "2026-08-18T04:59:37.814476+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1686000,
-      "change": 41000,
-      "change_rate": 2.49
+      "price": 1699000,
+      "change": 54000,
+      "change_rate": 3.28
     },
     "003230": {
       "name": "삼양식품",
@@ -21,39 +21,39 @@
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 195600,
-      "change": -8400,
-      "change_rate": -4.12
+      "price": 194900,
+      "change": -9100,
+      "change_rate": -4.46
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 33400,
-      "change": -300,
-      "change_rate": -0.89
+      "price": 33650,
+      "change": -50,
+      "change_rate": -0.15
     },
     "005930": {
       "name": "삼성전자",
-      "price": 271750,
-      "change": -2750,
-      "change_rate": -1.0
+      "price": 272250,
+      "change": -2250,
+      "change_rate": -0.82
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 27025,
-      "change": -385,
-      "change_rate": -1.4
+      "price": 27050,
+      "change": -360,
+      "change_rate": -1.31
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 42710,
-      "change": -1165,
-      "change_rate": -2.66
+      "price": 42845,
+      "change": -1030,
+      "change_rate": -2.35
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 186150,
-      "change": -2425,
-      "change_rate": -1.29
+      "price": 186415,
+      "change": -2160,
+      "change_rate": -1.15
     },
     "003490": {
       "name": "대한항공",
@@ -106,14 +106,14 @@
   },
   "indices": {
     "KOSPI": {
-      "price": 6937.42,
-      "change": -40.52,
-      "change_rate": -0.58
+      "price": 6958.53,
+      "change": -19.41,
+      "change_rate": -0.28
     },
     "KOSDAQ": {
-      "price": 846.71,
-      "change": -17.94,
-      "change_rate": -2.07
+      "price": 850.35,
+      "change": -14.3,
+      "change_rate": -1.65
     },
     "SPX": {
       "price": 7745.06,
