@@ -1,23 +1,23 @@
 {
-  "updated_at": "2026-08-19T02:45:18.700519+00:00",
+  "updated_at": "2026-08-19T03:34:10.929025+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1522000,
-      "change": -140000,
-      "change_rate": -8.42
+      "price": 1516000,
+      "change": -146000,
+      "change_rate": -8.78
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1334000,
-      "change": 0,
-      "change_rate": 0.0
+      "price": 1342000,
+      "change": 8000,
+      "change_rate": 0.6
     },
     "010120": {
       "name": "LS ELECTRIC",
-      "price": 202000,
-      "change": -7000,
-      "change_rate": -3.35
+      "price": 203500,
+      "change": -5500,
+      "change_rate": -2.63
     },
     "071050": {
       "name": "한국금융지주",
@@ -27,45 +27,45 @@
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 33250,
-      "change": -500,
-      "change_rate": -1.48
+      "price": 33300,
+      "change": -450,
+      "change_rate": -1.33
     },
     "005930": {
       "name": "삼성전자",
-      "price": 249500,
-      "change": -19000,
-      "change_rate": -7.08
+      "price": 248500,
+      "change": -20000,
+      "change_rate": -7.45
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 26695,
-      "change": -300,
-      "change_rate": -1.11
+      "price": 26690,
+      "change": -305,
+      "change_rate": -1.13
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 41040,
-      "change": -1550,
-      "change_rate": -3.64
+      "price": 41060,
+      "change": -1530,
+      "change_rate": -3.59
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 182430,
-      "change": -3470,
-      "change_rate": -1.87
+      "price": 182462,
+      "change": -3438,
+      "change_rate": -1.85
     },
     "003490": {
       "name": "대한항공",
-      "price": 24850,
-      "change": -400,
-      "change_rate": -1.58
+      "price": 24950,
+      "change": -300,
+      "change_rate": -1.19
     },
     "016360": {
       "name": "삼성증권",
-      "price": 85600,
-      "change": -3200,
-      "change_rate": -3.6
+      "price": 85500,
+      "change": -3300,
+      "change_rate": -3.72
     },
     "GOOGL": {
       "price": 344.2,
@@ -106,14 +106,14 @@
   },
   "indices": {
     "KOSPI": {
-      "price": 6494.84,
-      "change": -374.99,
-      "change_rate": -5.46
+      "price": 6484.31,
+      "change": -385.52,
+      "change_rate": -5.61
     },
     "KOSDAQ": {
-      "price": 830.81,
-      "change": -3.39,
-      "change_rate": -0.41
+      "price": 834.92,
+      "change": 0.72,
+      "change_rate": 0.09
     },
     "SPX": {
       "price": 7691.76,
