@@ -1,134 +1,134 @@
 {
-  "updated_at": "2026-08-21T06:57:21.249945+00:00",
+  "updated_at": "2026-08-24T01:45:21.104199+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1730000,
-      "change": 39000,
-      "change_rate": 2.31
+      "price": 1741000,
+      "change": 11000,
+      "change_rate": 0.64
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1366000,
-      "change": -31000,
-      "change_rate": -2.22
+      "price": 1398000,
+      "change": 32000,
+      "change_rate": 2.34
     },
     "010120": {
       "name": "LS ELECTRIC",
-      "price": 187000,
-      "change": -12200,
-      "change_rate": -6.12
+      "price": 191600,
+      "change": 4600,
+      "change_rate": 2.46
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 184500,
-      "change": -2300,
-      "change_rate": -1.23
+      "price": 182900,
+      "change": -1600,
+      "change_rate": -0.87
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 31750,
-      "change": 200,
-      "change_rate": 0.63
+      "price": 31550,
+      "change": -200,
+      "change_rate": -0.63
     },
     "005930": {
       "name": "삼성전자",
-      "price": 281500,
-      "change": 10500,
-      "change_rate": 3.87
+      "price": 263000,
+      "change": -18500,
+      "change_rate": -6.57
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 26295,
-      "change": -375,
-      "change_rate": -1.41
+      "price": 26355,
+      "change": 60,
+      "change_rate": 0.23
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 39840,
-      "change": -1115,
-      "change_rate": -2.72
+      "price": 39815,
+      "change": -25,
+      "change_rate": -0.06
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 179715,
-      "change": -2470,
-      "change_rate": -1.36
+      "price": 179562,
+      "change": -153,
+      "change_rate": -0.09
     },
     "003490": {
       "name": "대한항공",
-      "price": 25800,
-      "change": 750,
-      "change_rate": 2.99
+      "price": 26250,
+      "change": 450,
+      "change_rate": 1.74
     },
     "016360": {
       "name": "삼성증권",
-      "price": 92000,
-      "change": -400,
-      "change_rate": -0.43
+      "price": 86100,
+      "change": -5900,
+      "change_rate": -6.41
     },
     "GOOGL": {
-      "price": 340.67,
-      "change": -4.23,
-      "change_rate": -1.23,
+      "price": 344.82,
+      "change": 4.02,
+      "change_rate": 1.18,
       "currency": "USD"
     },
     "UBER": {
-      "price": 78.55,
-      "change": 0.28,
-      "change_rate": 0.36,
+      "price": 78.8,
+      "change": -0.1,
+      "change_rate": -0.13,
       "currency": "USD"
     },
     "MSFT": {
-      "price": 481.15,
-      "change": -3.71,
-      "change_rate": -0.77,
+      "price": 483.24,
+      "change": 2.13,
+      "change_rate": 0.44,
       "currency": "USD"
     },
     "BRK.B": {
-      "price": 496.86,
-      "change": -3.53,
-      "change_rate": -0.71,
+      "price": 495.82,
+      "change": -2.07,
+      "change_rate": -0.42,
       "currency": "USD"
     },
     "XOM": {
-      "price": 166.15,
-      "change": 1.52,
-      "change_rate": 0.92,
+      "price": 165.11,
+      "change": -1.22,
+      "change_rate": -0.73,
       "currency": "USD"
     },
     "DRAM": {
-      "price": 57.58,
-      "change": 1.65,
-      "change_rate": 2.95,
+      "price": 57.68,
+      "change": 0.65,
+      "change_rate": 1.14,
       "currency": "USD"
     }
   },
   "indices": {
     "KOSPI": {
-      "price": 6912.95,
-      "change": 60.37,
-      "change_rate": 0.88
+      "price": 6800.23,
+      "change": -112.72,
+      "change_rate": -1.63
     },
     "KOSDAQ": {
-      "price": 801.94,
-      "change": -38.95,
-      "change_rate": -4.63
+      "price": 814.46,
+      "change": 12.52,
+      "change_rate": 1.56
     },
     "SPX": {
-      "price": 7641.16,
-      "change": -66.82,
-      "change_rate": -0.87
+      "price": 7674.37,
+      "change": 33.21,
+      "change_rate": 0.43
     },
     "NASDAQ": {
-      "price": 26067.17,
-      "change": -263.92,
-      "change_rate": -1.0
+      "price": 26180.46,
+      "change": 113.29,
+      "change_rate": 0.43
     },
     "DJI": {
-      "price": 52759.21,
-      "change": -703.84,
-      "change_rate": -1.32
+      "price": 53277.01,
+      "change": 517.8,
+      "change_rate": 0.98
     }
   }
 }
