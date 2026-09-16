@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-16T04:25:41.521860+00:00",
+  "updated_at": "2026-09-16T09:28:13.636567+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -69,51 +69,51 @@
     },
     "GOOGL": {
       "price": 344.98,
-      "change": -2.49,
-      "change_rate": -0.72,
+      "change": 0.38,
+      "change_rate": 0.11,
       "currency": "USD"
     },
     "UBER": {
       "price": 71.43,
-      "change": -1.21,
-      "change_rate": -1.67,
+      "change": 0.03,
+      "change_rate": 0.04,
       "currency": "USD"
     },
     "MSFT": {
       "price": 497.12,
-      "change": -6.88,
-      "change_rate": -1.37,
+      "change": -1.68,
+      "change_rate": -0.34,
       "currency": "USD"
     },
     "BRK.B": {
       "price": 516.76,
-      "change": 1.37,
-      "change_rate": 0.27,
+      "change": -0.23,
+      "change_rate": -0.04,
       "currency": "USD"
     },
     "XOM": {
       "price": 169.32,
-      "change": 3.89,
-      "change_rate": 2.35,
+      "change": -0.13,
+      "change_rate": -0.08,
       "currency": "USD"
     },
     "DRAM": {
       "price": 55.01,
-      "change": -0.64,
-      "change_rate": -1.15,
+      "change": 0.1,
+      "change_rate": 0.18,
       "currency": "USD"
     }
   },
   "indices": {
     "KOSPI": {
-      "price": 6709.07,
-      "change": 81.81,
-      "change_rate": 1.23
+      "price": 6717.97,
+      "change": 90.71,
+      "change_rate": 1.37
     },
     "KOSDAQ": {
-      "price": 812.06,
-      "change": -0.35,
-      "change_rate": -0.04
+      "price": 815.98,
+      "change": 3.57,
+      "change_rate": 0.44
     },
     "SPX": {
       "price": 7585.73,
