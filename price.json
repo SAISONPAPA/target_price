@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-23T09:28:40.390030+00:00",
+  "updated_at": "2026-09-24T04:19:30.157510+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -68,39 +68,39 @@
       "change_rate": 0.23
     },
     "GOOGL": {
-      "price": 351.16,
-      "change": -0.74,
-      "change_rate": -0.21,
+      "price": 337.83,
+      "change": -14.07,
+      "change_rate": -4.0,
       "currency": "USD"
     },
     "UBER": {
-      "price": 69.89,
-      "change": -0.14,
-      "change_rate": -0.2,
+      "price": 69.42,
+      "change": -0.61,
+      "change_rate": -0.87,
       "currency": "USD"
     },
     "MSFT": {
-      "price": 498.0,
-      "change": -2.53,
-      "change_rate": -0.51,
+      "price": 500.59,
+      "change": 0.06,
+      "change_rate": 0.01,
       "currency": "USD"
     },
     "BRK.B": {
-      "price": 503.49,
-      "change": -0.11,
-      "change_rate": -0.02,
+      "price": 507.17,
+      "change": 3.57,
+      "change_rate": 0.71,
       "currency": "USD"
     },
     "XOM": {
-      "price": 158.71,
-      "change": -0.21,
-      "change_rate": -0.13,
+      "price": 161.23,
+      "change": 2.31,
+      "change_rate": 1.45,
       "currency": "USD"
     },
     "DRAM": {
-      "price": 63.62,
-      "change": -0.17,
-      "change_rate": -0.27,
+      "price": 61.9,
+      "change": -1.89,
+      "change_rate": -2.96,
       "currency": "USD"
     }
   },
@@ -116,19 +116,19 @@
       "change_rate": 1.07
     },
     "SPX": {
-      "price": 7764.64,
-      "change": -0.06,
-      "change_rate": -0.0
+      "price": 7706.03,
+      "change": -58.61,
+      "change_rate": -0.75
     },
     "NASDAQ": {
-      "price": 27244.28,
-      "change": 122.18,
-      "change_rate": 0.45
+      "price": 26936.04,
+      "change": -308.24,
+      "change_rate": -1.13
     },
     "DJI": {
-      "price": 51863.69,
-      "change": -185.14,
-      "change_rate": -0.36
+      "price": 51511.59,
+      "change": -352.1,
+      "change_rate": -0.68
     }
   }
 }
