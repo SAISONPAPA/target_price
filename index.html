@@ -207,6 +207,17 @@
   .valuation-link:hover{ background: rgba(201,162,39,0.12); }
   .valuation-frame-wrap{ display:none; margin-top: 10px; }
   .valuation-frame-wrap iframe{ width:100%; height:900px; border:none; display:block; }
+  .report-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .report-link{
+    display:inline-block; font-family:'IBM Plex Mono', monospace; font-size: 11.5px;
+    color: var(--gold); border: 1px solid var(--gold-dim); background: rgba(201,162,39,0.06);
+    padding: 9px 14px; text-decoration:none; cursor:pointer;
+  }
+  .report-link:hover{ background: rgba(201,162,39,0.12); }
+  .report-link.secondary{ color: var(--ink-dim); border-color: var(--line); background: transparent; }
+  .report-link.secondary:hover{ background: rgba(255,255,255,0.04); }
+  .report-frame-wrap{ display:none; margin-top: 10px; }
+  .report-frame-wrap iframe{ width:100%; height:600px; border:1px solid var(--line); display:block; }
 
   /* ---- 적립비교 ---- */
   .dca-compare{
@@ -357,10 +368,12 @@ const STOCKS = [
     sellNote:'35만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도' },
   { code:'086450', name:'동국제약', category:'국내주식', held:true, currency:'KRW',
     entry:21450, finalTP:30000, bullTP:36723, baseTP:33111, bearTP:29783,
-    sellNote:'하나증권 등 컨센서스 목표가 24,000~30,000원. 가설 4개 이상 동시 훼손 시 전량 매도(화장품 3Q QoQ 10%+ 성장 여부 / 마데카크림 아마존 랭킹 유지 / 마이핏 건기식 고성장 지속 / 리봄화장품 ODM 고성장 지속 / 약가인하 정책 리스크 현실화 여부).' },
+    sellNote:'하나증권 등 컨센서스 목표가 24,000~30,000원. 가설 4개 이상 동시 훼손 시 전량 매도(화장품 3Q QoQ 10%+ 성장 여부 / 마데카크림 아마존 랭킹 유지 / 마이핏 건기식 고성장 지속 / 리봄화장품 ODM 고성장 지속 / 약가인하 정책 리스크 현실화 여부).',
+    reportLink:'reports/dongkook-086450.pdf' },
   { code:'483650', name:'달바글로벌', category:'국내주식', held:true, currency:'KRW',
     entry:186600, finalTP:260000, bullTP:461508, baseTP:372268, bearTP:266398,
-    sellNote:'1차 목표가 260,000원(하나증권 12개월 목표주가). 가설 3개 이상 동시 훼손 또는 주가가 52주 최저(121,200원) 부근까지 재하락 시 전량 매도 검토.' },
+    sellNote:'1차 목표가 260,000원(하나증권 12개월 목표주가). 가설 3개 이상 동시 훼손 또는 주가가 52주 최저(121,200원) 부근까지 재하락 시 전량 매도 검토.',
+    reportLink:'reports/dalba-483650.pdf' },
 
   { code:'003490', name:'대한항공', category:'국내주식', held:false, watch:true, currency:'KRW',
     entry:null, finalTP:null, bullTP:38204, baseTP:33942, bearTP:29125 },
@@ -538,6 +551,16 @@ function renderCard(stock){
       <div class="valuation-frame-wrap"></div>
     </div>` : '';
 
+  const reportHTML = stock.reportLink ? `
+    <div class="calibration">
+      <div class="calibration-title">종합 리포트</div>
+      <div class="report-actions">
+        <button type="button" class="report-link" data-src="${stock.reportLink}">📄 리포트 보기</button>
+        <a class="report-link secondary" href="${stock.reportLink}" target="_blank" rel="noopener">↗ 새 탭에서 열기</a>
+      </div>
+      <div class="report-frame-wrap"></div>
+    </div>` : '';
+
   const sellStrategyHTML = (hasTP && hasEntry) ? `
     <div class="calibration">
       <div class="calibration-title">매도 전략</div>
@@ -565,6 +588,7 @@ function renderCard(stock){
       ${scenariosHTML}
       ${sellStrategyHTML}
       ${valuationHTML}
+      ${reportHTML}
     </div>
   </details>`;
 }
@@ -913,6 +937,25 @@ document.querySelectorAll('.valuation-link').forEach(btn => {
       const isOpen = wrap.style.display !== 'none';
       wrap.style.display = isOpen ? 'none' : 'block';
       btn.textContent = isOpen ? '📊 적정가 산출근거 보기' : '📊 적정가 산출근거 접기';
+    }
+  });
+});
+
+document.querySelectorAll('.report-link:not(.secondary)').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const wrap = btn.closest('.calibration')?.querySelector('.report-frame-wrap');
+    if (!wrap) return;
+    if (!wrap.dataset.loaded) {
+      const iframe = document.createElement('iframe');
+      iframe.src = btn.dataset.src;
+      wrap.appendChild(iframe);
+      wrap.dataset.loaded = 'true';
+      wrap.style.display = 'block';
+      btn.textContent = '📄 리포트 접기';
+    } else {
+      const isOpen = wrap.style.display !== 'none';
+      wrap.style.display = isOpen ? 'none' : 'block';
+      btn.textContent = isOpen ? '📄 리포트 보기' : '📄 리포트 접기';
     }
   });
 });
