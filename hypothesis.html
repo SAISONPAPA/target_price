@@ -86,6 +86,7 @@
   .item:first-child{ border-top:0; padding-top:2px; }
   .when{ font-size:13px; color:var(--muted); font-weight:600; padding-top:2px; }
   .when.soon{ color:var(--accent); }
+  .kindtxt{ font-size:11.5px; font-weight:600; color:var(--faint); margin-top:2px; }
   .ib{ min-width:0; display:grid; gap:4px; }
   .it{ font-weight:700; font-size:15.5px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
   .gate{ font-size:12px; color:var(--accent); background:var(--accent-soft); padding:1px 8px; border-radius:999px; font-weight:700; }
@@ -191,7 +192,7 @@
 
     html += '<section class="panel"><div class="ptitle"><span>다음 판정</span><span>가까운 순</span></div><div>' +
       pending.map(function(i, n){
-        return '<div class="item"><div class="when' + (n < 2 ? ' soon' : '') + '">' + esc(i.when) + '</div><div class="ib">' +
+        return '<div class="item"><div class="when' + (n < 2 ? ' soon' : '') + '">' + esc(i.when) + (i.dateKind ? '<div class="kindtxt">' + ({confirmed:'확정일',expected:'예상일',deadline:'기한'}[i.dateKind] || '') + '</div>' : '') + '</div><div class="ib">' +
           '<div class="it">' + esc(i.title) + (i.gate ? '<span class="gate">핵심</span>' : '') + '</div>' +
           '<div class="rule">붕괴: ' + esc(i.rule) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
       }).join('') + '</div></section>';

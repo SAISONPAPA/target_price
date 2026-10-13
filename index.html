@@ -68,8 +68,8 @@
   .sum-foot{ font-size:13px; color:var(--muted); }
 
   /* 시장 탭 */
-  .tabs{ display:grid; grid-template-columns:repeat(4,1fr); gap:4px; background:var(--surface-2); padding:4px; border-radius:12px; }
-  .tab{ min-height:44px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:600; cursor:pointer; padding:0 4px; }
+  .tabs{ display:grid; grid-template-columns:repeat(5,1fr); gap:4px; background:var(--surface-2); padding:4px; border-radius:12px; }
+  .tab{ min-height:44px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:600; cursor:pointer; padding:0 2px; font-size:14.5px; white-space:nowrap; }
   .tab.active{ background:var(--surface); color:var(--fg); box-shadow:0 1px 2px rgba(0,0,0,.08); }
   .panel{ display:none; gap:12px; }
   .panel.active{ display:grid; }
@@ -179,6 +179,51 @@
   .empty{ background:var(--surface); border-radius:16px; padding:28px 16px; text-align:center; color:var(--muted); font-size:15px; }
   .err{ background:var(--warn-soft); color:var(--warn); border-radius:12px; padding:12px 14px; font-size:14px; }
 
+
+  /* 가설 일정 */
+  .cal{ background:var(--surface); border-radius:16px; padding:14px; display:grid; gap:10px; }
+  .cal-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .cal-head b{ font-size:17px; }
+  .cal-nav{ display:flex; gap:6px; }
+  .cal-nav button{ width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:18px; color:var(--muted); }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px; text-align:center; }
+  .cal-grid .wd{ font-size:12px; color:var(--faint); padding:4px 0; }
+  .cal-grid .wd:first-child{ color:var(--up); } .cal-grid .wd:last-child{ color:var(--down); }
+  .day{ min-height:44px; border:0; background:transparent; border-radius:10px; display:grid; align-content:center; justify-items:center; gap:3px; font-size:15px; color:var(--fg); font-variant-numeric:tabular-nums; padding:4px 0; }
+  .day.out{ visibility:hidden; }
+  .day.today{ background:var(--surface-2); font-weight:800; }
+  .day.has{ cursor:pointer; font-weight:700; }
+  .day.has:hover{ background:var(--surface-2); }
+  .dots{ display:flex; gap:2px; height:6px; }
+  .dots i{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .dots i.gate{ background:var(--warn); }
+  .legend{ display:flex; gap:12px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend i{ width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; }
+  .legend i.gate{ background:var(--warn); }
+  .agenda{ display:grid; gap:14px; }
+  .ag-group{ display:grid; gap:8px; }
+  .ag-title{ font-size:15px; font-weight:800; display:flex; justify-content:space-between; align-items:baseline; padding:0 2px; }
+  .ag-title span{ font-size:13px; font-weight:600; color:var(--muted); }
+  .ag-title.overdue{ color:var(--bad); }
+  .ag-day{ background:var(--surface); border-radius:14px; padding:12px 14px; display:grid; gap:10px; scroll-margin-top:12px; }
+  .ag-day.flash{ outline:2px solid var(--accent); }
+  .ag-date{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; font-size:15px; }
+  .ag-date .dd{ font-size:13px; font-weight:700; color:var(--accent); }
+  .ag-date .dd.near{ color:var(--warn); }
+  .ag-date .dd.over{ color:var(--bad); }
+  .ev{ display:grid; gap:3px; text-decoration:none; color:inherit; padding:10px 12px; border-radius:10px; background:var(--surface-2); min-height:44px; }
+  .ev .t1{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:13.5px; color:var(--muted); font-weight:700; }
+  .ev .t2{ font-size:15px; font-weight:600; line-height:1.4; }
+  .ev .t3{ font-size:13px; color:var(--muted); }
+  .kind{ font-size:11.5px; font-weight:700; padding:1px 7px; border-radius:999px; background:var(--surface); color:var(--muted); }
+  .kind.confirmed{ background:var(--ok-soft); color:var(--ok); }
+  .kind.deadline{ background:var(--warn-soft); color:var(--warn); }
+  .gatebadge{ font-size:11.5px; font-weight:700; padding:1px 7px; border-radius:999px; background:var(--warn-soft); color:var(--warn); }
+  .past summary{ list-style:none; cursor:pointer; min-height:44px; display:flex; align-items:center; font-weight:700; color:var(--muted); padding:0 2px; }
+  .past summary::-webkit-details-marker{ display:none; }
+  .past[open] summary{ margin-bottom:8px; }
+
   @media (max-width:380px){ .sum-stats .v{ font-size:21px; } .c-price{ font-size:25px; } .scen{ grid-template-columns:1fr; } }
 </style>
 </head>
@@ -201,6 +246,7 @@
   <nav class="tabs" role="tablist" aria-label="분류">
     <button class="tab active" role="tab" data-tab="domestic">국내</button>
     <button class="tab" role="tab" data-tab="overseas">해외</button>
+    <button class="tab" role="tab" data-tab="schedule">일정</button>
     <button class="tab" role="tab" data-tab="dca">적립비교</button>
     <button class="tab" role="tab" data-tab="closed">매도완료</button>
   </nav>
@@ -255,6 +301,10 @@
       <div class="chart-wrap"><canvas id="dcaChartCanvas"></canvas></div>
     </div>
     <div id="board-dca"></div>
+  </section>
+
+  <section class="panel" data-panel="schedule">
+    <div id="board-schedule"></div>
   </section>
 
   <section class="panel" data-panel="closed">
@@ -454,8 +504,7 @@ function marketLabel(stock){
 function hypoOf(code){ return HYPO && HYPO.stocks ? HYPO.stocks.find(s => s.code === code) || null : null; }
 function daysUntil(iso){
   if (!iso || iso.startsWith('9999')) return null;
-  const d = new Date(iso + 'T23:59:59+09:00');
-  return Math.ceil((d - Date.now()) / 86400000);
+  return dayDiff(kstToday(), iso);
 }
 function thesisInfo(stock){
   const h = hypoOf(stock.code);
@@ -849,6 +898,8 @@ function renderSummary(){
       <div class="stat"><div class="k">가설 훼손 종목</div><div class="v num">${HYPO ? `${brokenStocks}<small>/ ${hypoStocks}</small>` : '–'}</div></div>
     </div>
     ${priceLoadFailed ? `<div class="err">시세를 불러오지 못했어요. 매수가 기준으로 표시하고 있어요.</div>` : ''}
+    ${HYPO ? (() => { const t0 = kstToday(), t7 = addDays(t0, 7); const n = scheduleEvents().filter(e => e.i.status === 'pending' && !e.due.startsWith('9999') && e.due >= t0 && e.due <= t7); const g = n.filter(e => e.i.gate).length;
+      return `<button type="button" class="sum-item" data-tabgo="schedule"><span class="n">📅 앞으로 7일 판정 ${n.length}건${g ? ` · 핵심 ${g}건` : ''}</span><span class="r">일정 탭에서 보기 →</span></button>`; })() : ''}
     <div class="sum-group">
       <div class="sum-title">⚠ 점검 필요</div>
       ${check.length ? `<div class="sum-list">${check.map(x => x.html).join('')}</div>` : `<div class="sum-empty">${HYPO ? '지금 점검할 가설이 없어요.' : '가설 불러오는 중…'}</div>`}
@@ -889,6 +940,128 @@ function updateAsof(){
 }
 
 /* ---------- 렌더 & 상호작용 ---------- */
+
+/* ---------- 가설 판정 일정 ---------- */
+let calMonth = null; // 'YYYY-MM'
+function kstToday(){ return new Date(Date.now() + 9*3600000).toISOString().slice(0,10); }
+function dateObj(iso){ return new Date(iso + 'T00:00:00Z'); }
+function addDays(iso, n){ const d = dateObj(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0,10); }
+function weekStart(iso){ const d = dateObj(iso); const wd = (d.getUTCDay() + 6) % 7; return addDays(iso, -wd); }
+function dayDiff(a, b){ return Math.round((dateObj(b) - dateObj(a)) / 86400000); }
+const WD = ['일','월','화','수','목','금','토'];
+function fmtDay(iso){ const d = dateObj(iso); return `${d.getUTCMonth()+1}/${d.getUTCDate()} (${WD[d.getUTCDay()]})`; }
+const KIND_LABEL = { confirmed:'확정일', expected:'예상일', deadline:'기한' };
+function scheduleEvents(){
+  const ev = [];
+  if (!HYPO || !HYPO.stocks) return ev;
+  HYPO.stocks.forEach(s => s.items.forEach(i => ev.push({ s, i, due: i.due, kind: i.dateKind || 'expected' })));
+  return ev;
+}
+function evHTML(e){
+  const st = e.i.status;
+  const stTag = st === 'bad' ? '<span class="tag bad">✕ 붕괴</span>' : st === 'ok' ? '<span class="tag ok">✓ 유지</span>' : '';
+  return `<a class="ev" href="hypothesis.html#${encodeURIComponent(e.s.code)}">
+    <div class="t1"><span>${esc(e.s.name)}</span>${e.i.gate ? '<span class="gatebadge">핵심</span>' : ''}<span class="kind ${e.kind}">${KIND_LABEL[e.kind] || '예상일'}</span>${stTag}</div>
+    <div class="t2">${esc(e.i.title)}</div>
+    <div class="t3">${st === 'pending' ? '붕괴: ' + esc(e.i.rule || '') : esc(e.i.result || '')}</div>
+  </a>`;
+}
+function dayBlock(iso, list, today){
+  const dd = dayDiff(today, iso);
+  const ddText = dd === 0 ? '오늘' : dd > 0 ? 'D-' + dd : (-dd) + '일 지남';
+  const cls = dd < 0 ? 'over' : dd <= 7 ? 'near' : '';
+  return `<div class="ag-day" id="d-${iso}"><div class="ag-date"><span>${fmtDay(iso)}</span><span class="dd ${cls}">${ddText}</span></div>${list.map(evHTML).join('')}</div>`;
+}
+function renderSchedule(){
+  const el = document.getElementById('board-schedule');
+  if (!el) return;
+  if (!HYPO){ el.innerHTML = `<div class="empty">가설 일정을 불러오는 중…</div>`; return; }
+  const today = kstToday();
+  if (!calMonth) calMonth = today.slice(0,7);
+  const all = scheduleEvents();
+  const dated = all.filter(e => !e.due.startsWith('9999'));
+  const pending = dated.filter(e => e.i.status === 'pending');
+  const ongoing = all.filter(e => e.due.startsWith('9999') && e.i.status === 'pending');
+  const past = dated.filter(e => e.i.status !== 'pending').sort((a,b) => a.due < b.due ? 1 : -1);
+
+  // 달력
+  const [Y, M] = calMonth.split('-').map(Number);
+  const first = `${calMonth}-01`;
+  const lead = dateObj(first).getUTCDay();
+  const days = new Date(Date.UTC(Y, M, 0)).getUTCDate();
+  const byDay = {};
+  pending.forEach(e => { (byDay[e.due] = byDay[e.due] || []).push(e); });
+  let cells = WD.map(w => `<div class="wd">${w}</div>`).join('');
+  for (let k = 0; k < lead; k++) cells += `<div class="day out" aria-hidden="true"></div>`;
+  for (let d = 1; d <= days; d++){
+    const iso = `${calMonth}-${String(d).padStart(2,'0')}`;
+    const evs = byDay[iso] || [];
+    const dots = evs.slice(0,4).map(e => `<i class="${e.i.gate ? 'gate' : ''}"></i>`).join('');
+    cells += evs.length
+      ? `<button type="button" class="day has${iso === today ? ' today' : ''}" data-jump="${iso}" aria-label="${M}월 ${d}일 판정 ${evs.length}건">${d}<span class="dots">${dots}</span></button>`
+      : `<div class="day${iso === today ? ' today' : ''}">${d}<span class="dots"></span></div>`;
+  }
+  const monthCount = pending.filter(e => e.due.startsWith(calMonth)).length;
+
+  // 목록 그룹
+  const ws = weekStart(today), nws = addDays(ws, 7), nnws = addDays(ws, 14);
+  const groups = [];
+  const push = (key, title, cls, filter) => {
+    const list = pending.filter(filter);
+    if (list.length) groups.push({ key, title, cls, list });
+  };
+  push('over', '기한 지남 · 판정 필요', 'overdue', e => e.due < today);
+  push('this', '이번 주', '', e => e.due >= today && e.due < nws);
+  push('next', '다음 주', '', e => e.due >= nws && e.due < nnws);
+  const later = pending.filter(e => e.due >= nnws);
+  const months = [...new Set(later.map(e => e.due.slice(0,7)))].sort();
+  months.forEach(m => {
+    const [yy, mm] = m.split('-').map(Number);
+    push('m' + m, (yy !== Number(today.slice(0,4)) ? yy + '년 ' : '') + mm + '월', '', e => e.due >= nnws && e.due.startsWith(m));
+  });
+  const groupHTML = groups.map(g => {
+    const dates = [...new Set(g.list.map(e => e.due))].sort();
+    return `<div class="ag-group"><div class="ag-title ${g.cls}">${g.title}<span>${g.list.length}건</span></div>
+      ${dates.map(d => dayBlock(d, g.list.filter(e => e.due === d), today)).join('')}</div>`;
+  }).join('');
+
+  const ongoingHTML = ongoing.length ? `<div class="ag-group"><div class="ag-title">상시 감시<span>${ongoing.length}건</span></div>
+    <div class="ag-day">${ongoing.map(evHTML).join('')}</div></div>` : '';
+  const pastHTML = past.length ? `<details class="past"><summary>지난 판정 ${past.length}건 보기 ▾</summary>
+    <div class="agenda">${[...new Set(past.map(e => e.due))].map(d => dayBlock(d, past.filter(e => e.due === d), today)).join('')}</div></details>` : '';
+
+  el.innerHTML = `<div class="agenda">
+    <div class="cal">
+      <div class="cal-head"><b>${Y}년 ${M}월 <span class="muted" style="font-weight:600">판정 ${monthCount}건</span></b>
+        <div class="cal-nav"><button type="button" data-cal="-1" aria-label="이전 달">‹</button><button type="button" data-cal="1" aria-label="다음 달">›</button></div></div>
+      <div class="cal-grid">${cells}</div>
+      <div class="legend"><span><i></i>판정</span><span><i class="gate"></i>핵심 가설</span><span><span class="kind confirmed">확정일</span>회사 발표일</span><span><span class="kind">예상일</span>추정</span><span><span class="kind deadline">기한</span>마감</span></div>
+    </div>
+    ${groupHTML || `<div class="empty">남은 판정 일정이 없어요.</div>`}
+    ${ongoingHTML}
+    ${pastHTML}
+    <div class="muted" style="text-align:center">가설 기준일 ${esc(HYPO.updated)} · 예상일은 실적 발표일이 공시되면 확정일로 바뀌어요</div>
+  </div>`;
+}
+document.addEventListener('click', e => {
+  const nav = e.target.closest('[data-cal]');
+  if (nav){
+    const [y, m] = calMonth.split('-').map(Number);
+    const d = new Date(Date.UTC(y, m - 1 + Number(nav.dataset.cal), 1));
+    calMonth = d.toISOString().slice(0,7);
+    renderSchedule();
+    return;
+  }
+  const j = e.target.closest('[data-jump]');
+  if (j){
+    const t = document.getElementById('d-' + j.dataset.jump);
+    if (t){ t.scrollIntoView({ behavior:'smooth', block:'start' }); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1400); }
+    return;
+  }
+  const tg = e.target.closest('[data-tabgo]');
+  if (tg){ activateTab(tg.dataset.tabgo); document.querySelector('.tabs').scrollIntoView({ behavior:'smooth', block:'start' }); }
+});
+
 function renderAllBoards(){
   const openCodes = new Set(Array.from(document.querySelectorAll('details.card[open]')).map(d => d.dataset.code || d.dataset.dcaCode).filter(Boolean));
   renderSummary();
@@ -896,6 +1069,7 @@ function renderAllBoards(){
   renderBoardInto('board-overseas', ['해외주식','해외ETF'], sortState.overseas);
   renderDcaBoard();
   renderClosedBoard();
+  renderSchedule();
   document.querySelectorAll('details.card').forEach(d => { const c = d.dataset.code || d.dataset.dcaCode; if (c && openCodes.has(c)) d.open = true; });
   updateIndices();
   updateAsof();
