@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TP TRACKER · 가설 보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  /* TP TRACKER(index.html)와 같은 팔레트·폰트 */
+  :root{
+    --bg: #0c1210; --bg-raised: #121b17; --card: #16211c; --line: #24352c; --trace: #1c2b23;
+    --gold: #c9a227; --gold-dim: #8a7126; --pcb-green: #3ea36b; --pcb-green-dim: #2a6b48;
+    --ink: #e9e6da; --ink-dim: #9aa79c; --ink-faint: #5f6d64;
+    --up: #ef5350; --down: #4f8ef7; --watch: #e0a63a;
+    color-scheme: dark;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    background-image: linear-gradient(var(--trace) 1px, transparent 1px), linear-gradient(90deg, var(--trace) 1px, transparent 1px);
+    background-size: 34px 34px;
+    color: var(--ink); font-family: 'Pretendard', -apple-system, sans-serif;
+    min-height: 100vh; padding: 24px 14px 60px; line-height: 1.5;
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+  .wrap{ max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
+  .mono{ font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  a{ color: var(--gold); }
+  .back{ font-family:'IBM Plex Mono', monospace; font-size: 12px; text-decoration: none; color: var(--ink-dim); }
+  .back:hover{ color: var(--gold); }
+
+  header{ border: 1px solid var(--line); background: var(--bg-raised); padding: 16px 18px; position: relative;
+    display:flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header::before{ content:""; position:absolute; inset:7px; border: 1px solid var(--gold-dim); opacity: .35; pointer-events:none; }
+  .brand{ font-family: 'Space Grotesk', sans-serif; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-dim); }
+  .brand b{ color: var(--gold); font-weight: 600; }
+  .stamp{ font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); text-align: right; line-height: 1.6; }
+
+  .tabs{ display:flex; gap: 6px; flex-wrap: wrap; }
+  .tab{ flex:1; min-width: 120px; font-family:'Space Grotesk', 'Pretendard', sans-serif; font-size: 13px; font-weight: 600;
+    background: var(--bg-raised); color: var(--ink-dim); border: 1px solid var(--line); padding: 11px 6px; cursor: pointer; }
+  .tab.active{ color: var(--gold); border-color: var(--gold-dim); background: rgba(201,162,39,0.08); }
+  .tab .cnt{ font-family:'IBM Plex Mono', monospace; font-size: 11px; margin-left: 6px; }
+  .tab .cnt.hot{ color: var(--up); }
+  button:focus-visible, a:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .panel{ border: 1px solid var(--line); background: var(--card); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .ptitle{ font-family:'Space Grotesk', 'Pretendard', sans-serif; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim);
+    display:flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .ptitle span:last-child{ letter-spacing: 0; text-transform: none; color: var(--ink-faint); font-family: 'Pretendard', sans-serif; }
+
+  /* 매도 게이지 */
+  .g-head{ display:flex; justify-content: space-between; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+  .g-big{ font-family:'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600; line-height: 1; }
+  .g-big small{ font-size: 14px; color: var(--ink-dim); font-weight: 400; }
+  .slots{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .slot{ height: 30px; border: 1px dashed var(--line); display:grid; place-items:center; font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); }
+  .slot.on{ border: 1px solid var(--up); background: rgba(239,83,80,.18); color: var(--up); font-weight: 600; }
+  .verdict{ padding: 10px 12px; font-size: 13.5px; font-weight: 600; border: 1px solid; }
+  .v-ok{ color: var(--pcb-green); border-color: var(--pcb-green-dim); background: rgba(62,163,107,.08); }
+  .v-warn{ color: var(--watch); border-color: rgba(224,166,58,.5); background: rgba(224,166,58,.08); }
+  .v-bad{ color: var(--up); border-color: rgba(239,83,80,.5); background: rgba(239,83,80,.1); }
+
+  /* 주가 레일 */
+  .px-row{ display:flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .px{ font-family:'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; }
+  .chg{ font-family:'IBM Plex Mono', monospace; font-size: 13px; margin-left: 6px; }
+  .chg.up{ color: var(--up); } .chg.down{ color: var(--down); }
+  .rail{ position: relative; height: 6px; background: linear-gradient(90deg, rgba(239,83,80,.55), var(--line) 35%, var(--pcb-green-dim)); margin: 30px 4px 30px; }
+  .pin{ position:absolute; top:-6px; width:2px; height:18px; }
+  .pin span{ position:absolute; white-space: nowrap; font-family:'IBM Plex Mono', monospace; font-size: 10.5px; }
+  .pin.kill{ background: var(--up); } .pin.kill span{ top: 22px; left: 0; color: var(--up); }
+  .pin.goal{ background: var(--pcb-green); } .pin.goal span{ top: 22px; right: 0; color: var(--pcb-green); }
+  .pin.now{ width: 12px; height: 12px; top: -3px; margin-left: -6px; background: var(--gold); border: 2px solid var(--card); border-radius: 50%; }
+  .pin.now span{ bottom: 16px; left: 50%; transform: translateX(-50%); color: var(--gold); font-weight: 600; }
+  .note{ font-size: 12.5px; color: var(--ink-dim); }
+  .alert{ font-size: 13px; color: var(--up); font-weight: 600; }
+
+  /* 가설 리스트 */
+  .item{ display:grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .item:first-child{ border-top: 0; padding-top: 2px; }
+  .when{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--ink-dim); padding-top: 2px; }
+  .when.soon{ color: var(--gold); }
+  .ib{ min-width: 0; display:grid; gap: 4px; }
+  .it{ font-weight: 600; font-size: 14.5px; display:flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .gate{ font-family:'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); border: 1px solid var(--gold-dim); padding: 0 5px; font-weight: 500; }
+  .rule{ font-size: 12.5px; color: var(--ink-dim); }
+  .src{ font-size: 11px; color: var(--ink-faint); }
+  .badge{ font-family:'IBM Plex Mono', monospace; font-size: 10.5px; padding: 2px 7px; border: 1px solid; font-weight: 600; justify-self: start; }
+  .b-ok{ color: var(--pcb-green); border-color: var(--pcb-green-dim); }
+  .b-bad{ color: var(--up); border-color: rgba(239,83,80,.5); }
+  .b-pending{ color: var(--ink-faint); border-color: var(--line); }
+
+  /* ROE */
+  .roe-top{ display:flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .roe-big{ font-family:'IBM Plex Mono', monospace; font-size: 28px; font-weight: 600; color: var(--gold); }
+  .tw{ overflow-x: auto; }
+  table{ border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td{ padding: 7px 6px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-family:'IBM Plex Mono', monospace; }
+  th:first-child, td:first-child{ text-align: left; }
+  th{ color: var(--ink-faint); font-weight: 500; font-size: 11px; }
+  tr.avg td{ font-weight: 600; border-bottom: 0; }
+  .bear{ color: var(--up); } .base{ color: var(--down); } .bull{ color: var(--pcb-green); }
+
+  .err{ border: 1px solid rgba(239,83,80,.5); color: var(--up); padding: 14px; font-size: 13px; background: var(--bg-raised); }
+  .foot{ font-size: 11px; color: var(--ink-faint); text-align: center; }
+  @media (max-width: 420px){ .item{ grid-template-columns: 68px 1fr; gap: 10px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← TP 트래커로 돌아가기</a>
+  <header>
+    <div class="brand"><b>TP</b> TRACKER · 가설</div>
+    <div class="stamp" id="stamp">불러오는 중...</div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div id="main"></div>
+  <p class="foot">붕괴는 누적으로 세고, 3개가 쌓이면 규칙대로 전량 매도 · 가설 상태는 hypotheses.json에서 수정</p>
+</div>
+
+<script>
+(function(){
+  var H = null, P = null, cur = null;
+
+  function won(n){ return n.toLocaleString('ko-KR') + '원'; }
+  function man(n){ return (n/10000).toLocaleString('ko-KR', {maximumFractionDigits:1}) + '만'; }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function kst(iso){
+    try { return new Date(iso).toLocaleString('ko-KR', { timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return iso; }
+  }
+  function brokenOf(s){ return s.items.filter(function(i){ return i.status === 'bad'; }).length; }
+
+  function renderTabs(){
+    document.getElementById('tabs').innerHTML = H.stocks.map(function(s){
+      var b = brokenOf(s), hot = b >= H.killCount - 1;
+      return '<button class="tab' + (s.code === cur ? ' active' : '') + '" data-code="' + s.code + '">' + esc(s.name) +
+        '<span class="cnt' + (hot ? ' hot' : '') + '">' + b + '/' + H.killCount + '</span></button>';
+    }).join('');
+  }
+
+  function render(){
+    var s = H.stocks.filter(function(x){ return x.code === cur; })[0];
+    if (!s) return;
+    renderTabs();
+    var K = H.killCount, b = brokenOf(s), left = Math.max(0, K - b);
+    var pending = s.items.filter(function(i){ return i.status === 'pending'; })
+      .sort(function(a, c){ return a.due < c.due ? -1 : a.due > c.due ? 1 : 0; });
+    var done = s.items.filter(function(i){ return i.status !== 'pending'; })
+      .sort(function(a, c){ return a.due < c.due ? 1 : -1; });
+    var gateBad = s.items.filter(function(i){ return i.gate && i.status === 'bad'; }).length;
+
+    var slots = '';
+    for (var k = 0; k < K; k++) slots += '<div class="slot' + (k < b ? ' on' : '') + '">' + (k < b ? '붕괴' : '—') + '</div>';
+    var vc = b >= K ? 'v-bad' : left === 1 ? 'v-warn' : 'v-ok';
+    var vt = b >= K ? '매도 조건 충족 — 규칙대로 전량 매도' :
+      left === 1 ? '한 개만 더 깨지면 전량 매도 · 다음 판정 ' + (pending[0] ? pending[0].when + ' ' + pending[0].title : '') :
+      '여유 ' + left + '칸 · 계속 보유 가능';
+    if (gateBad >= 2) vt += ' · 핵심 가설 2개 붕괴, 즉시 재검토';
+
+    var html = '';
+    html += '<section class="panel"><div class="ptitle"><span>매도까지</span><span>판정 끝 ' + done.length + ' · 남은 판정 ' + pending.length + '</span></div>' +
+      '<div class="g-head"><div class="g-big">' + b + ' <small>/ ' + K + ' 붕괴</small></div></div>' +
+      '<div class="slots">' + slots + '</div><div class="verdict ' + vc + '">' + esc(vt) + '</div></section>';
+
+    var q = P && P.stocks && P.stocks[s.code];
+    if (q){
+      var min = Math.min(s.kill, q.price) * 0.9, max = Math.max(s.goal, q.price) * 1.05;
+      var pos = function(v){ return Math.max(0, Math.min(100, (v - min) / (max - min) * 100)); };
+      var toKill = (q.price - s.kill) / q.price * 100;
+      var cls = q.change > 0 ? 'up' : q.change < 0 ? 'down' : '';
+      var sign = q.change > 0 ? '+' : '';
+      html += '<section class="panel"><div class="ptitle"><span>주가 위치</span><span>' + (P.domestic_updated_at || P.updated_at ? kst(P.domestic_updated_at || P.updated_at) + ' 기준' : '') + '</span></div>' +
+        '<div class="px-row"><div><span class="px">' + won(q.price) + '</span><span class="chg ' + cls + '">' + sign + q.change_rate + '%</span></div>' +
+        '<div class="note">손절선까지 <b class="mono">' + (toKill >= 0 ? '-' + toKill.toFixed(1) + '%' : '이미 하회') + '</b></div></div>' +
+        '<div class="rail" aria-hidden="true"><div class="pin kill" style="left:' + pos(s.kill) + '%"><span>손절 ' + man(s.kill) + '</span></div>' +
+        '<div class="pin goal" style="left:' + pos(s.goal) + '%"><span>목표 ' + man(s.goal) + '</span></div>' +
+        '<div class="pin now" style="left:' + pos(q.price) + '%"><span>' + man(q.price) + '</span></div></div>' +
+        (q.price < s.kill ? '<div class="alert">⚠ 현재가가 손절선 아래예요. 종가 기준 2주 이어지는지 확인하세요.</div>' : '') +
+        '<div class="note">' + esc(s.priceNote) + '</div></section>';
+    }
+
+    html += '<section class="panel"><div class="ptitle"><span>다음 판정</span><span>가까운 순</span></div><div>' +
+      pending.map(function(i, n){
+        return '<div class="item"><div class="when' + (n < 2 ? ' soon' : '') + '">' + esc(i.when) + '</div><div class="ib">' +
+          '<div class="it">' + esc(i.title) + (i.gate ? '<span class="gate">핵심</span>' : '') + '</div>' +
+          '<div class="rule">붕괴: ' + esc(i.rule) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
+      }).join('') + '</div></section>';
+
+    html += '<section class="panel"><div class="ptitle"><span>판정 끝난 가설</span><span>붕괴는 그대로 이월</span></div><div>' +
+      done.map(function(i){
+        return '<div class="item"><div class="when">' + esc(i.when) + '</div><div class="ib">' +
+          '<span class="badge ' + (i.status === 'bad' ? 'b-bad">붕괴' : 'b-ok">유지') + '</span>' +
+          '<div class="it">' + esc(i.title) + '</div><div class="rule">' + esc(i.result) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
+      }).join('') + '</div></section>';
+
+    if (s.roe){
+      var R = s.roe, av = [1,2,3].map(function(c){ var t = 0; R.rows.forEach(function(r){ t += r[c]; }); return t / R.rows.length; });
+      var ex = (av[0]*R.weights[0] + av[1]*R.weights[1] + av[2]*R.weights[2]) / 100;
+      html += '<section class="panel"><div class="ptitle"><span>ROE 시나리오 2026~2030</span><span>' + esc(R.prev) + '</span></div>' +
+        '<div class="roe-top"><span class="roe-big">' + ex.toFixed(1) + '%</span><span class="note">확률가중 5년 평균</span></div>' +
+        '<div class="tw"><table><thead><tr><th></th><th>Bear ' + R.weights[0] + '%</th><th>Base ' + R.weights[1] + '%</th><th>Bull ' + R.weights[2] + '%</th></tr></thead><tbody>' +
+        R.rows.map(function(r){ return '<tr><td>' + r[0] + '</td><td class="bear">' + r[1] + '%</td><td class="base">' + r[2] + '%</td><td class="bull">' + r[3] + '%</td></tr>'; }).join('') +
+        '<tr class="avg"><td>평균</td><td class="bear">' + av[0].toFixed(1) + '%</td><td class="base">' + av[1].toFixed(1) + '%</td><td class="bull">' + av[2].toFixed(1) + '%</td></tr>' +
+        '</tbody></table></div></section>';
+    }
+    document.getElementById('main').innerHTML = '<div class="wrap" style="padding:0">' + html + '</div>';
+  }
+
+  document.getElementById('tabs').addEventListener('click', function(e){
+    var t = e.target.closest('.tab'); if (!t) return;
+    cur = t.dataset.code; history.replaceState(null, '', '#' + cur); render();
+  });
+
+  var bust = '?t=' + Date.now();
+  Promise.all([
+    fetch('./hypotheses.json' + bust).then(function(r){ if (!r.ok) throw new Error('hypotheses.json ' + r.status); return r.json(); }),
+    fetch('./price.json' + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+  ]).then(function(res){
+    H = res[0]; P = res[1];
+    var want = (location.hash || '').replace('#', '');
+    cur = H.stocks.some(function(s){ return s.code === want; }) ? want : H.stocks[0].code;
+    document.getElementById('stamp').innerHTML = '가설 기준 ' + esc(H.updated) + '<br>' + (P ? '시세 ' + kst(P.domestic_updated_at || P.updated_at) : '시세 불러오기 실패');
+    render();
+  }).catch(function(err){
+    document.getElementById('stamp').textContent = '오류';
+    document.getElementById('main').innerHTML = '<div class="err">hypotheses.json을 불러오지 못했어요 (' + esc(err.message) + '). 파일이 index.html과 같은 위치에 올라갔는지 확인해 주세요.</div>';
+  });
+})();
+</script>
+</body>
+</html>
