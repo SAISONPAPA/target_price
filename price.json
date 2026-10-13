@@ -1,67 +1,67 @@
 {
-  "updated_at": "2026-10-13T04:22:34.682139+00:00",
+  "updated_at": "2026-10-13T06:28:56.274707+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1455000,
-      "change": -158000,
-      "change_rate": -9.8,
+      "price": 1435000,
+      "change": -170000,
+      "change_rate": -10.59,
       "src": "yahoo"
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1171000,
-      "change": -34000,
-      "change_rate": -2.82,
+      "price": 1164000,
+      "change": -33000,
+      "change_rate": -2.76,
       "src": "yahoo"
     },
     "010120": {
       "name": "LS ELECTRIC",
-      "price": 177900,
-      "change": -7250,
-      "change_rate": -3.92,
+      "price": 178100,
+      "change": -5500,
+      "change_rate": -3.0,
       "src": "yahoo"
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 156100,
-      "change": -8900,
-      "change_rate": -5.39,
+      "price": 160600,
+      "change": -5000,
+      "change_rate": -3.02,
       "src": "yahoo"
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 31300,
-      "change": -800,
-      "change_rate": -2.49,
+      "price": 31800,
+      "change": -400,
+      "change_rate": -1.24,
       "src": "yahoo"
     },
     "005930": {
       "name": "삼성전자",
-      "price": 230000,
-      "change": -21250,
-      "change_rate": -8.46,
+      "price": 230500,
+      "change": -20000,
+      "change_rate": -7.98,
       "src": "yahoo"
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 25995,
-      "change": 10,
-      "change_rate": 0.04,
+      "price": 26015,
+      "change": 70,
+      "change_rate": 0.27,
       "src": "yahoo"
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 40175,
-      "change": -1000,
-      "change_rate": -2.43,
+      "price": 40145,
+      "change": -880,
+      "change_rate": -2.15,
       "src": "yahoo"
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 181095,
-      "change": -2225,
-      "change_rate": -1.21,
+      "price": 181055,
+      "change": -1905,
+      "change_rate": -1.04,
       "src": "yahoo"
     },
     "003490": {
@@ -116,30 +116,30 @@
     },
     "086450": {
       "name": "동국제약",
-      "price": 23050,
-      "change": -700,
-      "change_rate": -2.95,
+      "price": 23200,
+      "change": -400,
+      "change_rate": -1.69,
       "src": "yahoo"
     },
     "483650": {
       "name": "달바글로벌",
-      "price": 163700,
-      "change": -8700,
-      "change_rate": -5.05,
+      "price": 155900,
+      "change": -15800,
+      "change_rate": -9.2,
       "src": "yahoo"
     }
   },
   "indices": {
     "KOSPI": {
-      "price": 5972.09,
-      "change": -436.34,
-      "change_rate": -6.81,
+      "price": 6001.53,
+      "change": -382.71,
+      "change_rate": -5.99,
       "src": "yahoo"
     },
     "KOSDAQ": {
-      "price": 819.1,
-      "change": -33.8,
-      "change_rate": -3.96,
+      "price": 831.28,
+      "change": -17.91,
+      "change_rate": -2.11,
       "src": "yahoo"
     },
     "SPX": {
@@ -158,5 +158,5 @@
       "change_rate": 0.38
     }
   },
-  "domestic_updated_at": "2026-10-13T04:22:30.499889+00:00"
+  "domestic_updated_at": "2026-10-13T06:28:52.909270+00:00"
 }
