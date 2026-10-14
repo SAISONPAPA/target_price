@@ -48,6 +48,13 @@
   .brand{ font-size:20px; font-weight:800; letter-spacing:-.01em; }
   .brand span{ color:var(--accent); }
   .asof{ font-size:13px; color:var(--faint); }
+  .top-r{ display:flex; align-items:center; gap:8px; margin-left:auto; }
+  .refresh{ min-height:44px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--fg); font-weight:600; font-size:14px; cursor:pointer; }
+  .refresh .ic{ font-size:17px; line-height:1; display:inline-block; }
+  .refresh.busy .ic{ animation:spin .8s linear infinite; }
+  .refresh:disabled{ opacity:.7; cursor:default; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(20px + env(safe-area-inset-bottom,0px)); background:var(--fg); color:var(--bg); padding:10px 16px; border-radius:999px; font-size:14px; font-weight:600; z-index:10; max-width:calc(100% - 32px); text-align:center; }
 
   /* 요약 */
   .summary{ background:var(--surface); border-radius:16px; padding:18px; display:grid; gap:16px; }
@@ -232,7 +239,10 @@
 
   <header class="top">
     <div class="brand"><span>TP</span> TRACKER</div>
-    <div class="asof" id="asof">시세 불러오는 중…</div>
+    <div class="top-r">
+      <div class="asof" id="asof" aria-live="polite">시세 불러오는 중…</div>
+      <button type="button" class="refresh" id="refreshBtn" aria-label="시세 새로고침"><span class="ic" aria-hidden="true">↻</span><span class="lb">새로고침</span></button>
+    </div>
   </header>
 
   <section class="summary" id="summary" aria-label="투자 현황">
@@ -1131,10 +1141,35 @@ document.addEventListener('click', e => {
 
 renderAllBoards();
 
-fetch('./price.json?t=' + Date.now())
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then(data => { latestPriceData = data; renderAllBoards(); })
-  .catch(() => { priceLoadFailed = true; console.warn('price.json 로드 실패 — 고정값 표시 중'); renderAllBoards(); });
+function showToast(msg){
+  let t = document.getElementById('toast');
+  if (!t){ t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role','status'); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(showToast._t); showToast._t = setTimeout(() => { t.hidden = true; }, 2600);
+}
+function loadPrices(manual){
+  const btn = document.getElementById('refreshBtn');
+  const before = latestPriceData && latestPriceData.updated_at;
+  if (btn){ btn.disabled = true; btn.classList.add('busy'); }
+  return fetch('./price.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => {
+      latestPriceData = data; priceLoadFailed = false; renderAllBoards();
+      if (manual){
+        const t = new Date(data.updated_at).toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+        showToast(before && before === data.updated_at ? `이미 최신이에요 · ${t} 기준 (${relativeTimeText(data.updated_at)})` : `새 시세를 반영했어요 · ${t} 기준`);
+      }
+    })
+    .catch(() => {
+      if (!latestPriceData) priceLoadFailed = true;
+      console.warn('price.json 로드 실패 — 고정값 표시 중');
+      renderAllBoards();
+      if (manual) showToast('시세를 불러오지 못했어요. 잠시 후 다시 눌러 주세요');
+    })
+    .finally(() => { if (btn){ btn.disabled = false; btn.classList.remove('busy'); } });
+}
+document.getElementById('refreshBtn').addEventListener('click', () => loadPrices(true));
+loadPrices(false);
 
 fetch('./hypotheses.json?t=' + Date.now())
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
