@@ -2,8 +2,10 @@ name: Update Stock Price (Naver + Yahoo)
 
 on:
   schedule:
-    # UTC 0:00~6:50 = KST 09:00~15:50, 평일 10분마다
-    - cron: "*/10 0-6 * * 1-5"
+    # 평일 KST 09:07~15:07 매시 7분 (UTC 0~6시), 정각은 깃헙 예약이 몰려 자주 누락돼서 피함
+    - cron: "7 0-6 * * 1-5"
+    # 장 마감 후 종가 반영: KST 15:37 (UTC 6:37)
+    - cron: "37 6 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
