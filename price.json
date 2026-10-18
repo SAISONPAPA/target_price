@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-16T11:50:50.503480+00:00",
+  "updated_at": "2026-10-18T02:58:30.043953+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -79,39 +79,39 @@
       "src": "yahoo"
     },
     "GOOGL": {
-      "price": 349.22,
-      "change": 1.22,
-      "change_rate": 0.35,
+      "price": 340.59,
+      "change": -7.41,
+      "change_rate": -2.13,
       "currency": "USD"
     },
     "UBER": {
-      "price": 71.27,
-      "change": 0.16,
-      "change_rate": 0.22,
+      "price": 70.35,
+      "change": -0.76,
+      "change_rate": -1.07,
       "currency": "USD"
     },
     "MSFT": {
-      "price": 539.44,
-      "change": 2.79,
-      "change_rate": 0.52,
+      "price": 529.05,
+      "change": -7.6,
+      "change_rate": -1.42,
       "currency": "USD"
     },
     "BRK.B": {
-      "price": 525.68,
-      "change": -0.82,
-      "change_rate": -0.16,
+      "price": 532.02,
+      "change": 5.52,
+      "change_rate": 1.05,
       "currency": "USD"
     },
     "XOM": {
-      "price": 174.68,
-      "change": 0.08,
-      "change_rate": 0.05,
+      "price": 178.98,
+      "change": 4.38,
+      "change_rate": 2.51,
       "currency": "USD"
     },
     "DRAM": {
-      "price": 49.33,
-      "change": 0.64,
-      "change_rate": 1.31,
+      "price": 46.45,
+      "change": -2.24,
+      "change_rate": -4.6,
       "currency": "USD"
     },
     "086450": {
@@ -143,20 +143,32 @@
       "src": "yahoo"
     },
     "SPX": {
-      "price": 7744.06,
-      "change": 25.12,
-      "change_rate": 0.33
+      "price": 7659.44,
+      "change": -84.62,
+      "change_rate": -1.09
     },
     "NASDAQ": {
-      "price": 26713.03,
-      "change": 20.16,
-      "change_rate": 0.08
+      "price": 26140.03,
+      "change": -573.0,
+      "change_rate": -2.15
     },
     "DJI": {
-      "price": 52177.69,
-      "change": 556.21,
-      "change_rate": 1.08
+      "price": 52002.41,
+      "change": -175.28,
+      "change_rate": -0.34
+    },
+    "VIX": {
+      "price": 19.99,
+      "change": 3.53,
+      "change_rate": 21.45
+    },
+    "FEAR_GREED": {
+      "score": 17.9,
+      "rating": "extreme fear",
+      "previous_close": 31.5,
+      "previous_1_week": 46.5,
+      "timestamp": "2026-10-16T23:59:49+00:00"
     }
   },
-  "domestic_updated_at": "2026-10-16T11:50:47.549717+00:00"
+  "domestic_updated_at": "2026-10-18T02:58:26.968038+00:00"
 }
