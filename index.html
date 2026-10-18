@@ -284,6 +284,8 @@
       <div class="idx" data-index="SPX"><div class="k">S&amp;P 500</div><div class="v num">-</div><div class="c num">-</div></div>
       <div class="idx" data-index="NASDAQ"><div class="k">NASDAQ</div><div class="v num">-</div><div class="c num">-</div></div>
       <div class="idx" data-index="DJI"><div class="k">DOW</div><div class="v num">-</div><div class="c num">-</div></div>
+      <div class="idx" data-index="VIX"><div class="k">VIX</div><div class="v num">-</div><div class="c num">-</div></div>
+      <div class="idx" data-fg="1"><div class="k">CNN 공포·탐욕</div><div class="v num">-</div><div class="c">-</div></div>
     </div>
     <div class="controls" data-scope="overseas">
             <select class="sel grow" id="sort-overseas" data-scope="overseas" aria-label="정렬">
@@ -937,6 +939,16 @@ function updateIndices(){
     c.textContent = arrow(d.change_rate) + ' ' + signPct(d.change_rate, 2);
     c.className = 'c num ' + dirClass(d.change_rate);
   });
+  const fg = data.indices.FEAR_GREED, fgEl = document.querySelector('.idx[data-fg]');
+  if (fgEl){
+    if (fg && typeof fg.score === 'number'){
+      const ko = { 'extreme fear':'극단적 공포', 'fear':'공포', 'neutral':'중립', 'greed':'탐욕', 'extreme greed':'극단적 탐욕' }[String(fg.rating || '').toLowerCase()] || (fg.rating || '');
+      fgEl.querySelector('.v').textContent = Math.round(fg.score);
+      fgEl.querySelector('.c').textContent = ko + (typeof fg.previous_1_week === 'number' ? ' · 1주 전 ' + Math.round(fg.previous_1_week) : '');
+    } else {
+      fgEl.querySelector('.c').innerHTML = '<a href="https://www.cnn.com/markets/fear-and-greed" target="_blank" rel="noopener">CNN에서 보기 ↗</a>';
+    }
+  }
 }
 function updateAsof(){
   const el = document.getElementById('asof');
