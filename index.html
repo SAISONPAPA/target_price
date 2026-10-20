@@ -329,7 +329,7 @@
 <script>
 const STOCKS = [
   { code:'000660', name:'SK하이닉스', category:'국내주식', held:true, currency:'KRW',
-    entry:1678000, finalTP:3200000, bullTP:6359783, baseTP:5503981, bearTP:4002647,
+    entry:1678000, finalTP:3200000, bullTP:6359783, baseTP:5503981, bearTP:4002647, stressedTP:2971736, superBullTP:7486906,
     sellNote:'240만원 도달 시 50% 매도, 320만원 도달 시 나머지 50% 매도',
     hypoLink:'hypothesis.html#000660' },
   { code:'010120', name:'LS ELECTRIC', category:'국내주식', held:true, currency:'KRW',
@@ -337,7 +337,7 @@ const STOCKS = [
     sellNote:'25만원 도달 시 전량 매도',
     hypoLink:'hypothesis.html#010120' },
   { code:'071050', name:'한국금융지주', category:'국내주식', held:true, currency:'KRW',
-    entry:234857, finalTP:400000, bullTP:906421, baseTP:855277, bearTP:797119,
+    entry:234857, finalTP:400000, bullTP:906421, baseTP:855277, bearTP:797119, stressedTP:736431, superBullTP:956439,
     sellNote:'30만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도',
     hypoLink:'hypothesis.html#071050' },
   { code:'316140', name:'우리금융지주', category:'국내주식', held:true, currency:'KRW',
@@ -345,7 +345,7 @@ const STOCKS = [
     sellNote:'[9/14 실행완료] 36,700원에 50% 매도함. 잔여 50%는 40,000원 도달 시 매도 예정.',
     hypoLink:'hypothesis.html#316140' },
   { code:'005930', name:'삼성전자', category:'국내주식', held:true, currency:'KRW',
-    entry:290000, finalTP:400000, bullTP:412297, baseTP:364355, bearTP:273376,
+    entry:290000, finalTP:400000, bullTP:412297, baseTP:364355, bearTP:273376, stressedTP:214355, superBullTP:470836,
     sellNote:'35만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도',
     hypoLink:'hypothesis.html#005930' },
   { code:'086450', name:'동국제약', category:'국내주식', held:true, currency:'KRW',
@@ -634,8 +634,8 @@ function renderCard(stock){
         <div class="now" style="left:${pp}%"><span>현재</span></div>
       </div>
       <div class="scen">
-        ${['bear','base','bull'].map(c => { const v = stock[c+'TP']; if (v == null) return ''; const p = hasEntry ? ((v - stock.entry) / stock.entry * 100) : null;
-          return `<div><div class="k">${c.toUpperCase()} TP</div><div class="v num">${stock.currency==='USD' ? '$'+v.toLocaleString('en-US') : v.toLocaleString('ko-KR')}</div>${p!=null?`<div class="p num">${p>=0?'+':''}${p.toFixed(1)}%</div>`:''}</div>`; }).join('')}
+        ${['stressed','bear','base','bull','superBull'].map(c => { const v = stock[c+'TP']; if (v == null) return ''; const p = hasEntry ? ((v - stock.entry) / stock.entry * 100) : null;
+          return `<div><div class="k">${({stressed:'STRESSED',bear:'BEAR',base:'BASE',bull:'BULL',superBull:'SUPER BULL'})[c]} TP</div><div class="v num">${stock.currency==='USD' ? '$'+v.toLocaleString('en-US') : v.toLocaleString('ko-KR')}</div>${p!=null?`<div class="p num">${p>=0?'+':''}${p.toFixed(1)}%</div>`:''}</div>`; }).join('')}
       </div>
     </div>`;
   } else if (!hasTP){

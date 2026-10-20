@@ -105,6 +105,7 @@
   th:first-child, td:first-child{ text-align:left; }
   th{ color:var(--muted); font-weight:600; font-size:13px; }
   tr.avg td{ font-weight:800; border-bottom:0; }
+  table.wide{ font-size:13px; } table.wide th, table.wide td{ padding:8px 3px; } table.wide th{ font-size:12px; }
   .bear{ color:var(--bad); } .base{ color:var(--down); } .bull{ color:var(--ok); }
   .err{ background:var(--warn-soft); color:var(--warn); padding:14px; border-radius:12px; font-size:14px; }
   .foot{ font-size:13px; color:var(--faint); text-align:center; }
@@ -264,15 +265,19 @@
     }
 
     if (s.roe){
-      var R = s.roe, av = [1,2,3].map(function(c){ var t = 0; R.rows.forEach(function(r){ t += r[c]; }); return t / R.rows.length; });
-      var W = R.weights, ex = W ? (av[0]*W[0] + av[1]*W[1] + av[2]*W[2]) / 100 : av[1];
+      var R = s.roe, C = R.cols || ['Bear','Base','Bull'], nC = C.length;
+      var av = C.map(function(_, k){ var tt = 0; R.rows.forEach(function(r){ tt += r[k+1]; }); return tt / R.rows.length; });
+      var W = !R.cols && R.weights, bi = C.indexOf('Base');
+      var ex = W ? (av[0]*W[0] + av[1]*W[1] + av[2]*W[2]) / 100 : av[bi];
+      var cls = function(n){ return n === 'Base' ? 'base' : /Bull/.test(n) ? 'bull' : 'bear'; };
       var span = R.rows[0][0].slice(0,4) + '~' + R.rows[R.rows.length-1][0].slice(0,4);
+      var sh = function(n){ return n === 'Super Bull' ? 'S.Bull' : n === 'Stressed' ? 'Stress' : n; };
       html += '<section class="panel"><div class="ptitle"><span>ROE 시나리오 ' + span + '</span><span>' + esc(R.prev) + '</span></div>' +
-        '<div class="roe-top"><span class="roe-big">' + ex.toFixed(1) + '%</span><span class="note">' + (W ? '확률가중 평균' : 'Base 평균 (확률 미설정)') + '</span></div>' +
-        '<div class="tw"><table><thead><tr><th></th><th>Bear' + (W ? ' ' + W[0] + '%' : '') + '</th><th>Base' + (W ? ' ' + W[1] + '%' : '') + '</th><th>Bull' + (W ? ' ' + W[2] + '%' : '') + '</th></tr></thead><tbody>' +
-        R.rows.map(function(r){ return '<tr><td>' + r[0] + '</td><td class="bear">' + r[1] + '%</td><td class="base">' + r[2] + '%</td><td class="bull">' + r[3] + '%</td></tr>'; }).join('') +
-        '<tr class="avg"><td>평균</td><td class="bear">' + av[0].toFixed(1) + '%</td><td class="base">' + av[1].toFixed(1) + '%</td><td class="bull">' + av[2].toFixed(1) + '%</td></tr>' +
-        '</tbody></table></div></section>';
+        '<div class="roe-top"><span class="roe-big">' + ex.toFixed(1) + '%</span><span class="note">' + (W ? '확률가중 평균' : 'Base 평균') + '</span></div>' +
+        '<div class="tw"><table' + (nC > 3 ? ' class="wide"' : '') + '><thead><tr><th></th>' + C.map(function(n, k){ return '<th>' + sh(n) + (W ? ' ' + W[k] + '%' : '') + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        R.rows.map(function(r){ return '<tr><td>' + r[0] + '</td>' + C.map(function(n, k){ return '<td class="' + cls(n) + '">' + r[k+1] + '%</td>'; }).join('') + '</tr>'; }).join('') +
+        '<tr class="avg"><td>평균</td>' + C.map(function(n, k){ return '<td class="' + cls(n) + '">' + av[k].toFixed(1) + '%</td>'; }).join('') + '</tr>' +
+        '</tbody></table></div>' + (R.src ? '<div class="src">' + esc(R.src) + '</div>' : '') + '</section>';
     }
     if (H.ruleLog && H.ruleLog.length){
       var RU = H.rules || {};
