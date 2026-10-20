@@ -116,6 +116,12 @@
   .log{ font-size:14px; display:grid; gap:6px; }
   .log b{ font-size:15px; }
   .rules{ margin:0; padding-left:18px; font-size:14px; color:var(--muted); display:grid; gap:4px; }
+  .gbar{ display:flex; height:10px; border-radius:999px; overflow:hidden; background:var(--surface-2); gap:2px; }
+  .gv{ background:var(--ok); } .gp{ background:var(--line); } .gb{ background:var(--bad); }
+  .trg{ display:grid; grid-template-columns:38px minmax(0,1fr); gap:6px; font-size:14px; align-items:start; }
+  .trg b{ font-size:12px; text-align:center; border-radius:6px; padding:1px 0; }
+  .trg.g b{ color:var(--ok); background:var(--ok-soft); } .trg.r b{ color:var(--bad); background:var(--bad-soft); }
+  .trg i{ color:var(--faint); font-style:normal; }
   @media (max-width:380px){ .item{ grid-template-columns:72px minmax(0,1fr); gap:10px; } }
 </style>
 </head>
@@ -232,11 +238,23 @@
       }).join('') + '</div></section>';
 
     if (s.reportCheckpoints){
-      var RC = s.reportCheckpoints, LB = { ok:['b-ok','순항'], warn:['b-warn','주의'], '':['b-pending','미정'] };
-      html += '<section class="panel"><div class="ptitle"><span>리포트 체크포인트</span><span>' + esc(RC.source) + ' · 참고, 카운트 미포함</span></div><div>' +
-        RC.items.map(function(i){ var L = LB[i.lean || ''] || LB['']; return '<div class="item"><div class="when">' + esc(i.when) + '</div><div class="ib">' +
-          '<span class="badge ' + L[0] + '">' + L[1] + '</span><div class="it">' + esc(i.title) + '</div>' +
-          '<div class="rule">빨간불: ' + esc(i.rule) + '</div><div class="src">현재: ' + esc(i.basis) + '</div></div></div>'; }).join('') + '</div></section>';
+      var RC = s.reportCheckpoints, V = RC.items.filter(function(i){ return i.verdict === 'ok'; }).length,
+        B2 = RC.items.filter(function(i){ return i.verdict === 'bad'; }).length, Pn = RC.items.length - V - B2, net = V - B2;
+      var gl = net > 0 ? ['v-ok','긍정'] : net < 0 ? ['v-bad','부정'] : ['v-warn','중립'];
+      var md = function(iso){ return iso ? (+iso.slice(5,7)) + '/' + (+iso.slice(8,10)) + (iso.slice(0,4) !== '2026' ? '<div class="kindtxt">' + iso.slice(0,4) + '</div>' : '') : ''; };
+      html += '<section class="panel"><div class="ptitle"><span>리포트 체크포인트</span><span>' + esc(RC.source) + ' ' + esc(RC.date.slice(5).replace('-','/')) + ' · 카운트 미포함</span></div>' +
+        '<div class="g-head"><div class="g-big">' + (net > 0 ? '+' : '') + net + ' <small>순점수</small></div><div class="note">검증 ' + V + ' · 진행 ' + Pn + ' · 붕괴 ' + B2 + '</div></div>' +
+        '<div class="gbar"><span class="gv" style="flex:' + V + '"></span><span class="gp" style="flex:' + Pn + '"></span><span class="gb" style="flex:' + B2 + '"></span></div>' +
+        '<div class="verdict ' + gl[0] + '">' + gl[1] + ' — 붕괴 3개면 ' + esc(RC.stopRule.replace('가설 3개 이상 붕괴 시 ','')) + ', 검증 3개면 ' + esc(RC.expandRule.replace('가설 3개 이상 검증 시 ','')) + '</div><div>' +
+        RC.items.map(function(i){
+          var bd = i.verdict === 'ok' ? 'b-ok">검증' : i.verdict === 'bad' ? 'b-bad">붕괴' : 'b-pending">' + esc(i.progress);
+          return '<div class="item"><div class="when">' + md(i.due) + '</div><div class="ib">' +
+            '<div class="it">' + esc(i.theme) + '<span class="badge ' + bd + '</span></div>' +
+            '<div class="rule">' + esc(i.hypo) + '</div>' +
+            '<div class="trg g"><b>검증</b><span>' + (i.green ? esc(i.green) : '<i>리포트에 기준 없음</i>') + '</span></div>' +
+            '<div class="trg r"><b>붕괴</b><span>' + (i.red ? esc(i.red) : '<i>리포트에 기준 없음</i>') + '</span></div>' +
+            '<div class="src">현재: ' + esc(i.basis) + '</div></div></div>';
+        }).join('') + '</div></section>';
     }
 
     if (s.roe){
