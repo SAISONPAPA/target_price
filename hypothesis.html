@@ -247,7 +247,7 @@
     if (s.reportCheckpoints){
       var RC = s.reportCheckpoints, V = RC.items.filter(function(i){ return i.verdict === 'ok'; }).length,
         B2 = RC.items.filter(function(i){ return i.verdict === 'bad'; }).length, Pn = RC.items.length - V - B2, net = V - B2;
-      var gl = net > 0 ? ['v-ok','긍정'] : net < 0 ? ['v-bad','부정'] : ['v-warn','중립'];
+      var LBL = { '긍정':'v-ok', '부정':'v-bad', '중립':'v-warn' }, gl = RC.gaugeLabel ? [LBL[RC.gaugeLabel] || 'v-warn', RC.gaugeLabel + ' (리포트 판정)'] : net > 0 ? ['v-ok','긍정'] : net < 0 ? ['v-bad','부정'] : ['v-warn','중립'];
       var md = function(iso){ return iso ? (+iso.slice(5,7)) + '/' + (+iso.slice(8,10)) + (iso.slice(0,4) !== '2026' ? '<div class="kindtxt">' + iso.slice(0,4) + '</div>' : '') : ''; };
       html += '<section class="panel"><div class="ptitle"><span>리포트 체크포인트</span><span>' + esc(RC.source) + ' ' + esc(RC.date.slice(5).replace('-','/')) + ' · 카운트 미포함</span></div>' +
         '<div class="g-head"><div class="g-big">' + (net > 0 ? '+' : '') + net + ' <small>순점수</small></div><div class="note">검증 ' + V + ' · 진행 ' + Pn + ' · 붕괴 ' + B2 + '</div></div>' +
