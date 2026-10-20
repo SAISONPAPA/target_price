@@ -518,24 +518,45 @@ function thesisInfo(stock){
   const h = hypoOf(stock.code);
   if (!h) return null;
   const K = h.killCount || HYPO.killCount || 3;
-  const broken = h.items.filter(i => i.status === 'bad');
-  const pending = h.items.filter(i => i.status === 'pending').slice().sort((a,b) => a.due < b.due ? -1 : a.due > b.due ? 1 : 0);
+  const broken = h.items.filter(i => i.status === 'bad' && i.kind !== 'price');
+  const pending = h.items.filter(i => i.status === 'pending' && !(i.kind === 'price' && i.due.startsWith('9999'))).slice().sort((a,b) => a.due < b.due ? -1 : a.due > b.due ? 1 : 0);
   const next = pending.find(i => !i.due.startsWith('9999')) || pending[0] || null;
   const live = liveOf(stock);
   const belowKill = typeof h.kill === 'number' && live && live.price < h.kill;
+  const sig = signalOf(h, live);
+  const floor = floorHit(stock);
   const soon = pending.filter(i => { const d = daysUntil(i.due); return d != null && d <= SOON_DAYS; });
   let level = 'ok';
   if (broken.length >= K) level = 'bad';
-  else if (broken.length > 0 || belowKill) level = (broken.length >= K - 1 || belowKill) ? 'bad' : 'warn';
+  else if (sig.on || floor) level = 'bad';
+  else if (broken.length > 0 || belowKill) level = broken.length >= K - 1 ? 'bad' : 'warn';
   else if (soon.length) level = 'warn';
-  return { h, K, broken, pending, next, belowKill, soon, level };
+  return { h, K, broken, pending, next, belowKill, sig, floor, soon, level };
+}
+// 10/20 규칙: 손절선 아래 + 기준일 대비 벤치마크보다 5%p 이상 부진 → 재점검 신호 (붕괴 개수 미포함)
+function signalOf(h, live){
+  const bi = latestPriceData && latestPriceData.indices && latestPriceData.indices[h.benchmark || 'KOSPI'];
+  if (!live || !bi || !h.ref) return { on:false };
+  const ret = (live.price / h.ref.price - 1) * 100, bret = (bi.price / h.ref.index - 1) * 100, gap = ret - bret;
+  const th = (HYPO.rules && HYPO.rules.relThreshold) || -5;
+  return { on: typeof h.kill === 'number' && live.price < h.kill && gap <= th, ret, bret, gap };
+}
+function floorHit(stock){
+  const l = liveOf(stock); const r = l ? returnPct(stock, l.price) : null;
+  const f = (HYPO && HYPO.rules && HYPO.rules.floorPct) || -50;
+  return r != null && r <= f ? r : null;
+}
+function crashDay(){
+  const k = latestPriceData && latestPriceData.indices && latestPriceData.indices.KOSPI;
+  return k && typeof k.change_rate === 'number' && k.change_rate <= ((HYPO && HYPO.rules && HYPO.rules.crashPct) || -3) ? k : null;
 }
 function thesisChip(stock){
   const t = thesisInfo(stock);
   if (!t) return `<div class="thesis none">가설 미등록</div>`;
   const icon = t.level === 'bad' ? '✕' : t.broken.length || t.belowKill ? '!' : t.soon.length ? '…' : '✓';
+  const sigTxt = t.floor != null ? '마지노선 재점검' : t.sig.on ? '재점검 신호' : null;
   const dSoon = t.soon.length ? daysUntil(t.soon[0].due) : null;
-  const label = t.broken.length >= t.K ? '매도 조건 충족' : t.belowKill ? '손절선 아래' : t.broken.length ? '가설 훼손' : dSoon != null ? '판정 임박 ' + (dSoon <= 0 ? '오늘' : 'D-' + dSoon) : '가설 유지';
+  const label = t.broken.length >= t.K ? '매도 조건 충족' : sigTxt ? sigTxt : t.belowKill ? '손절선 아래(시장 탓)' : t.broken.length ? '가설 훼손' : dSoon != null ? '판정 임박 ' + (dSoon <= 0 ? '오늘' : 'D-' + dSoon) : '가설 유지';
   const nx = t.next ? `다음 판정 ${esc(t.next.when)}` : '남은 판정 없음';
   return `<div class="thesis ${t.level}"><span class="st">${icon} ${label} · 붕괴 ${t.broken.length}/${t.K}</span><span class="nx">${nx}</span></div>`;
 }
@@ -623,10 +644,10 @@ function renderCard(stock){
       <div class="sec-t">Thesis Check Point <span class="muted" style="font-weight:400">· 기준일 ${esc(HYPO.updated)}</span></div>
       <div class="hlist">
         ${(() => { const sorted = t.h.items.slice().sort((a,b) => { const o = s => s.status === 'bad' ? 0 : s.status === 'pending' ? 1 : 2; return o(a) - o(b) || (a.due < b.due ? -1 : 1); });
-          const shown = sorted.filter(i => i.status === 'bad').concat(sorted.filter(i => i.status === 'pending').slice(0, 3));
+          const shown = sorted.filter(i => i.status === 'bad' && i.kind !== 'price').concat(sorted.filter(i => i.status === 'pending').slice(0, 3));
           const rest = sorted.length - shown.length;
           return shown.map(i => `
-          <div class="hrow"><span class="tag ${i.status === 'bad' ? 'bad' : i.status === 'ok' ? 'ok' : 'pend'}">${i.status === 'bad' ? '✕ 붕괴' : i.status === 'ok' ? '✓ 유지' : '… 대기'}</span>
+          <div class="hrow"><span class="tag ${i.kind === 'price' ? 'pend' : i.status === 'bad' ? 'bad' : i.status === 'ok' ? 'ok' : 'pend'}">${i.kind === 'price' ? '주가 신호' : i.status === 'bad' ? '✕ 붕괴' : i.status === 'ok' ? '✓ 유지' : '… 대기'}</span>
           <div><div>${esc(i.title)}${i.gate ? ' <span class="badge">핵심</span>' : ''}</div><div class="w">${esc(i.when)}${i.status === 'pending' && i.rule ? ' · 붕괴: ' + esc(i.rule) : i.result ? ' · ' + esc(i.result) : ''}</div></div></div>`).join('') + (rest > 0 ? `<div class="muted">외 ${rest}개 항목은 가설 보드에서 볼 수 있어요</div>` : ''); })()}
       </div>
     </div>` : '';
@@ -889,11 +910,15 @@ function renderSummary(){
     const reasons = []; let score = 0;
     if (t.broken.length >= t.K){ reasons.push('✕ 매도 조건 충족'); score += 100; }
     else if (t.broken.length){ reasons.push(`✕ 붕괴 ${t.broken.length}/${t.K}`); score += 10 * t.broken.length; }
-    if (t.belowKill){ reasons.push('⚠ 손절선 아래'); score += 20; }
+    if (t.sig.on){ reasons.push(`⚠ 재점검 신호 (시장 대비 ${t.sig.gap.toFixed(1)}%p)`); score += 20; }
+    else if (t.belowKill){ reasons.push('손절선 아래 · 시장 탓'); score += 2; }
     if (t.soon.length){ const d = daysUntil(t.soon[0].due); reasons.push(`… 판정 ${d <= 0 ? '오늘' : 'D-' + d}`); score += 1; }
+    if (t.floor != null){ reasons.push(`⚠ 마지노선 ${signPct(t.floor)}`); score += 30; }
     if (reasons.length) check.push({ s, score, html: goBtn(s, score >= 20 ? 'bad' : score >= 10 ? 'warn' : '', reasons.join(' · ')) });
   });
+  STOCKS.filter(s => s.held && !thesisInfo(s)).forEach(s => { const f = floorHit(s); if (f != null) check.push({ s, score: 30, html: goBtn(s, 'bad', `⚠ 마지노선 ${signPct(f)} · 재점검`) }); });
   check.sort((a,b) => b.score - a.score);
+  const cr = crashDay();
 
   let best = null, worst = null;
   held.forEach(s => { const l = liveOf(s); if (l && typeof l.change_rate === 'number'){ if (!best || l.change_rate > best.r) best = { n: s.name, r: l.change_rate }; if (!worst || l.change_rate < worst.r) worst = { n: s.name, r: l.change_rate }; } });
@@ -905,6 +930,7 @@ function renderSummary(){
       <div class="stat"><div class="k">수익 / 손실 종목</div><div class="v num">${counted ? `<span class="up">${gain}</span><small>/</small><span class="down">${loss}</span>` : '–'}</div></div>
       <div class="stat"><div class="k">가설 훼손 종목</div><div class="v num">${HYPO ? `${brokenStocks}<small>/ ${hypoStocks}</small>` : '–'}</div></div>
     </div>
+    ${cr ? `<div class="err">⚠ 급락일 (코스피 ${cr.change_rate}%) — 오늘은 매도 판단하지 않고 3거래일 뒤로 미뤄요.</div>` : ''}
     ${priceLoadFailed ? `<div class="err">시세를 불러오지 못했어요. 매수가 기준으로 표시하고 있어요.</div>` : ''}
     ${HYPO ? (() => { const t0 = kstToday(), t7 = addDays(t0, 7); const n = scheduleEvents().filter(e => e.i.status === 'pending' && !e.due.startsWith('9999') && e.due >= t0 && e.due <= t7); const g = n.filter(e => e.i.gate).length;
       return `<button type="button" class="sum-item" data-tabgo="schedule"><span class="n">📅 앞으로 7일 판정 ${n.length}건${g ? ` · 핵심 ${g}건` : ''}</span><span class="r">일정 탭에서 보기 →</span></button>`; })() : ''}
@@ -972,7 +998,7 @@ const KIND_LABEL = { confirmed:'확정일', expected:'예상일', deadline:'기�
 function scheduleEvents(){
   const ev = [];
   if (!HYPO || !HYPO.stocks) return ev;
-  HYPO.stocks.forEach(s => s.items.forEach(i => ev.push({ s, i, due: i.due, kind: i.dateKind || 'expected' })));
+  HYPO.stocks.forEach(s => s.items.filter(i => !(i.kind === 'price' && i.due.startsWith('9999'))).forEach(i => ev.push({ s, i, due: i.due, kind: i.dateKind || 'expected' })));
   return ev;
 }
 function evHTML(e){

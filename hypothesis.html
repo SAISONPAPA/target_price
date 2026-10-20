@@ -108,6 +108,14 @@
   .bear{ color:var(--bad); } .base{ color:var(--down); } .bull{ color:var(--ok); }
   .err{ background:var(--warn-soft); color:var(--warn); padding:14px; border-radius:12px; font-size:14px; }
   .foot{ font-size:13px; color:var(--faint); text-align:center; }
+  .sig{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .sig div{ background:var(--surface-2); border-radius:10px; padding:8px 10px; font-size:12.5px; color:var(--muted); }
+  .sig b{ display:block; font-size:17px; color:var(--fg); font-variant-numeric:tabular-nums; }
+  .b-warn{ color:var(--warn); background:var(--warn-soft); }
+  .pk{ font-size:12px; color:var(--muted); background:var(--surface-2); padding:1px 8px; border-radius:999px; font-weight:700; }
+  .log{ font-size:14px; display:grid; gap:6px; }
+  .log b{ font-size:15px; }
+  .rules{ margin:0; padding-left:18px; font-size:14px; color:var(--muted); display:grid; gap:4px; }
   @media (max-width:380px){ .item{ grid-template-columns:72px minmax(0,1fr); gap:10px; } }
 </style>
 </head>
@@ -120,7 +128,7 @@
   </header>
   <div class="tabs" id="tabs"></div>
   <div id="main"></div>
-  <p class="foot">붕괴는 누적으로 세고, 종목마다 정한 개수가 쌓이면 규칙대로 전량 매도 · 가설 상태는 hypotheses.json에서 수정</p>
+  <p class="foot">붕괴는 회사 가설만 누적으로 세고, 정한 개수가 쌓이면 전량 매도 · 주가는 재점검 신호로만 사용 (10/20 규칙 변경)</p>
 </div>
 
 <script>
@@ -137,13 +145,23 @@
     try { return new Date(iso).toLocaleString('ko-KR', { timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }); }
     catch(e){ return iso; }
   }
-  function brokenOf(s){ return s.items.filter(function(i){ return i.status === 'bad'; }).length; }
+  function isPrice(i){ return i.kind === 'price'; }
+  function brokenOf(s){ return s.items.filter(function(i){ return i.status === 'bad' && !isPrice(i); }).length; }
+  function crashDay(){ var k = P && P.indices && P.indices.KOSPI; return k && k.change_rate <= ((H.rules && H.rules.crashPct) || -3) ? k : null; }
+  function sigOf(s){
+    var q = P && P.stocks && P.stocks[s.code], bi = P && P.indices && P.indices[s.benchmark || 'KOSPI'];
+    if (!q || !bi || !s.ref) return null;
+    var ret = (q.price / s.ref.price - 1) * 100, bret = (bi.price / s.ref.index - 1) * 100, gap = ret - bret;
+    var below = typeof s.kill === 'number' && q.price < s.kill, th = (H.rules && H.rules.relThreshold) || -5;
+    return { ret:ret, bret:bret, gap:gap, below:below, on: below && gap <= th, bname: s.benchmark === 'SPX' ? 'S&P500' : '코스피' };
+  }
+  function pct(v){ return (v > 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
   function renderTabs(){
     document.getElementById('tabs').innerHTML = H.stocks.map(function(s){
-      var KK = s.killCount || H.killCount, b = brokenOf(s), hot = b >= KK - 1;
+      var KK = s.killCount || H.killCount, b = brokenOf(s), sg = sigOf(s), hot = b >= KK - 1 || (sg && sg.on);
       return '<button class="tab' + (s.code === cur ? ' active' : '') + '" data-code="' + s.code + '">' + esc(s.name) +
-        '<span class="cnt' + (hot ? ' hot' : '') + '">' + b + '/' + KK + '</span></button>';
+        '<span class="cnt' + (hot ? ' hot' : '') + '">' + b + '/' + KK + (sg && sg.on ? ' ⚠' : '') + '</span></button>';
     }).join('');
   }
 
@@ -153,7 +171,7 @@
     USD = s.currency === 'USD';
     renderTabs();
     var K = s.killCount || H.killCount, b = brokenOf(s), left = Math.max(0, K - b);
-    var pending = s.items.filter(function(i){ return i.status === 'pending'; })
+    var pending = s.items.filter(function(i){ return i.status === 'pending' && !(isPrice(i) && i.due === '9999-12-31'); })
       .sort(function(a, c){ return a.due < c.due ? -1 : a.due > c.due ? 1 : 0; });
     var done = s.items.filter(function(i){ return i.status !== 'pending'; })
       .sort(function(a, c){ return a.due < c.due ? 1 : -1; });
@@ -167,7 +185,8 @@
       '여유 ' + left + '칸 · 계속 보유 가능';
     if (gateBad >= 2) vt += ' · 핵심 가설 2개 붕괴, 즉시 재검토';
 
-    var html = '';
+    var html = '', cr = crashDay(), sg = sigOf(s);
+    if (cr) html += '<div class="alert">⚠ 급락일: 코스피 ' + cr.change_rate + '% — 매도 판단은 3거래일 뒤로 보류 (규칙 ③)</div>';
     html += '<section class="panel"><div class="ptitle"><span>매도까지</span><span>판정 끝 ' + done.length + ' · 남은 판정 ' + pending.length + '</span></div>' +
       '<div class="g-head"><div class="g-big">' + b + ' <small>/ ' + K + ' 붕괴</small></div></div>' +
       '<div class="slots" style="grid-template-columns:repeat(' + K + ',1fr)">' + slots + '</div><div class="verdict ' + vc + '">' + esc(vt) + '</div></section>';
@@ -186,23 +205,39 @@
         '<div class="rail" aria-hidden="true">' + (hasKill ? '<div class="pin kill" style="left:' + pos(s.kill) + '%"><span>손절 ' + short(s.kill) + '</span></div>' : '') +
         '<div class="pin goal" style="left:' + pos(s.goal) + '%"><span>목표 ' + short(s.goal) + '</span></div>' +
         '<div class="pin now" style="left:' + pos(q.price) + '%"><span>' + short(q.price) + '</span></div></div>' +
-        (hasKill && q.price < s.kill ? '<div class="alert">⚠ 현재가가 손절선 아래예요. 종가 기준 2주 이어지는지 확인하세요.</div>' : '') +
         '<div class="note">' + esc(s.priceNote) + '</div></section>';
+    }
+
+    if (sg){
+      html += '<section class="panel"><div class="ptitle"><span>재점검 신호</span><span>기준일 ' + esc(s.ref.date.slice(5).replace('-','/')) + ' 종가 대비 · 붕괴 개수 미포함</span></div>' +
+        '<div class="sig"><div>종목<b class="mono">' + pct(sg.ret) + '</b></div><div>' + sg.bname + '<b class="mono">' + pct(sg.bret) + '</b></div><div>시장 대비<b class="mono">' + (sg.gap > 0 ? '+' : '') + sg.gap.toFixed(1) + '%p</b></div></div>' +
+        '<div class="verdict ' + (sg.on ? 'v-bad' : sg.below ? 'v-warn' : 'v-ok') + '">' +
+        (sg.on ? '신호 켜짐 — 48시간 안에 가설을 최신 자료로 다시 판정하고 결정을 기록' :
+         sg.below ? '손절선 아래지만 시장 대비 −5%p 이내 — 시장 탓, 신호 꺼짐' :
+         (typeof s.kill === 'number' ? '손절선 위 — 신호 꺼짐' : '주가 손절선 없음 — 신호 해당 없음')) + '</div></section>';
     }
 
     html += '<section class="panel"><div class="ptitle"><span>다음 판정</span><span>가까운 순</span></div><div>' +
       pending.map(function(i, n){
         return '<div class="item"><div class="when' + (n < 2 ? ' soon' : '') + '">' + esc(i.when) + (i.dateKind ? '<div class="kindtxt">' + ({confirmed:'확정일',expected:'예상일',deadline:'기한'}[i.dateKind] || '') + '</div>' : '') + '</div><div class="ib">' +
-          '<div class="it">' + esc(i.title) + (i.gate ? '<span class="gate">핵심</span>' : '') + '</div>' +
+          '<div class="it">' + esc(i.title) + (i.gate ? '<span class="gate">핵심</span>' : '') + (isPrice(i) ? '<span class="pk">주가 신호 · 카운트 제외</span>' : '') + '</div>' +
           '<div class="rule">붕괴: ' + esc(i.rule) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
       }).join('') + '</div></section>';
 
     if (done.length) html += '<section class="panel"><div class="ptitle"><span>판정 끝난 가설</span><span>붕괴는 그대로 이월</span></div><div>' +
       done.map(function(i){
         return '<div class="item"><div class="when">' + esc(i.when) + '</div><div class="ib">' +
-          '<span class="badge ' + (i.status === 'bad' ? 'b-bad">붕괴' : 'b-ok">유지') + '</span>' +
-          '<div class="it">' + esc(i.title) + '</div><div class="rule">' + esc(i.result) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
+          '<span class="badge ' + (isPrice(i) ? 'b-pending">' + (i.status === 'bad' ? '구 규칙 붕괴' : '유지') : i.status === 'bad' ? 'b-bad">붕괴' : 'b-ok">유지') + '</span>' +
+          '<div class="it">' + esc(i.title) + (isPrice(i) ? '<span class="pk">주가 신호 · 카운트 제외</span>' : '') + '</div><div class="rule">' + esc(i.result) + '</div><div class="src">' + esc(i.src) + '</div></div></div>';
       }).join('') + '</div></section>';
+
+    if (s.reportCheckpoints){
+      var RC = s.reportCheckpoints, LB = { ok:['b-ok','순항'], warn:['b-warn','주의'], '':['b-pending','미정'] };
+      html += '<section class="panel"><div class="ptitle"><span>리포트 체크포인트</span><span>' + esc(RC.source) + ' · 참고, 카운트 미포함</span></div><div>' +
+        RC.items.map(function(i){ var L = LB[i.lean || ''] || LB['']; return '<div class="item"><div class="when">' + esc(i.when) + '</div><div class="ib">' +
+          '<span class="badge ' + L[0] + '">' + L[1] + '</span><div class="it">' + esc(i.title) + '</div>' +
+          '<div class="rule">빨간불: ' + esc(i.rule) + '</div><div class="src">현재: ' + esc(i.basis) + '</div></div></div>'; }).join('') + '</div></section>';
+    }
 
     if (s.roe){
       var R = s.roe, av = [1,2,3].map(function(c){ var t = 0; R.rows.forEach(function(r){ t += r[c]; }); return t / R.rows.length; });
@@ -214,6 +249,13 @@
         R.rows.map(function(r){ return '<tr><td>' + r[0] + '</td><td class="bear">' + r[1] + '%</td><td class="base">' + r[2] + '%</td><td class="bull">' + r[3] + '%</td></tr>'; }).join('') +
         '<tr class="avg"><td>평균</td><td class="bear">' + av[0].toFixed(1) + '%</td><td class="base">' + av[1].toFixed(1) + '%</td><td class="bull">' + av[2].toFixed(1) + '%</td></tr>' +
         '</tbody></table></div></section>';
+    }
+    if (H.ruleLog && H.ruleLog.length){
+      var RU = H.rules || {};
+      html += '<section class="panel"><div class="ptitle"><span>판정 규칙</span><span>' + esc(RU.version || '') + ' 적용</span></div><ol class="rules">' +
+        ['count','signal','recheck','crash','floor'].filter(function(k){ return RU[k]; }).map(function(k){ return '<li>' + esc(RU[k]) + '</li>'; }).join('') + '</ol></section>';
+      html += '<section class="panel"><div class="ptitle"><span>규칙 변경 기록</span><span>지우지 않고 누적</span></div>' +
+        H.ruleLog.map(function(l){ return '<div class="log"><b>' + esc(l.date) + ' · ' + esc(l.title) + '</b><div class="rule">변경 전: ' + esc(l.before) + '</div><div class="rule">변경 후: ' + esc(l.after) + '</div><div class="src">이유: ' + esc(l.reason) + '</div></div>'; }).join('') + '</section>';
     }
     document.getElementById('main').innerHTML = '<div class="wrap" style="padding:0">' + html + '</div>';
   }
