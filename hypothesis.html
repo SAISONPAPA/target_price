@@ -139,7 +139,7 @@
 
 <script>
 (function(){
-  var H = null, P = null, cur = null;
+  var H = null, P = null, HS = null, cur = null;
 
   function won(n){ return n.toLocaleString('ko-KR') + '원'; }
   function man(n){ return (n/10000).toLocaleString('ko-KR', {maximumFractionDigits:1}) + '만'; }
@@ -155,11 +155,13 @@
   function brokenOf(s){ return s.items.filter(function(i){ return i.status === 'bad' && !isPrice(i); }).length; }
   function crashDay(){ var k = P && P.indices && P.indices.KOSPI; return k && k.change_rate <= ((H.rules && H.rules.crashPct) || -3) ? k : null; }
   function sigOf(s){
-    var q = P && P.stocks && P.stocks[s.code], bi = P && P.indices && P.indices[s.benchmark || 'KOSPI'];
-    if (!q || !bi || !s.ref) return null;
-    var ret = (q.price / s.ref.price - 1) * 100, bret = (bi.price / s.ref.index - 1) * 100, gap = ret - bret;
-    var below = typeof s.kill === 'number' && q.price < s.kill, th = (H.rules && H.rules.relThreshold) || -5;
-    return { ret:ret, bret:bret, gap:gap, below:below, on: below && gap <= th, bname: s.benchmark === 'SPX' ? 'S&P500' : '코스피' };
+    var q = P && P.stocks && P.stocks[s.code], bk = s.benchmark || 'KOSPI', bi = P && P.indices && P.indices[bk];
+    if (!q || !bi) return null;
+    var RU = H.rules || {}, r = HS && HS.rel && HS.rel[s.code] || {};
+    var daily = q.change_rate - bi.change_rate, d20 = typeof r.d20 === 'number' ? r.d20 : null;
+    var below = typeof s.kill === 'number' && q.price < s.kill;
+    var hitD = daily <= (RU.relThreshold || -5), hit20 = d20 != null && d20 <= (RU.rel20Threshold || -10);
+    return { daily:daily, d20:d20, r:r, below:below, hitD:hitD, hit20:hit20, on: below && (hitD || hit20), bname: bk === 'SPX' ? 'S&P500' : '코스피' };
   }
   function pct(v){ return (v > 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
@@ -215,11 +217,15 @@
     }
 
     if (sg){
-      html += '<section class="panel"><div class="ptitle"><span>재점검 신호</span><span>기준일 ' + esc(s.ref.date.slice(5).replace('-','/')) + ' 종가 대비 · 붕괴 개수 미포함</span></div>' +
-        '<div class="sig"><div>종목<b class="mono">' + pct(sg.ret) + '</b></div><div>' + sg.bname + '<b class="mono">' + pct(sg.bret) + '</b></div><div>시장 대비<b class="mono">' + (sg.gap > 0 ? '+' : '') + sg.gap.toFixed(1) + '%p</b></div></div>' +
+      var dp = function(v){ return v == null ? '–' : (v > 0 ? '+' : '') + v.toFixed(1) + '%p'; };
+      html += '<section class="panel"><div class="ptitle"><span>재점검 신호</span><span>' + sg.bname + ' 대비 · 붕괴 개수 미포함</span></div>' +
+        '<div class="sig"><div>손절선<b>' + (typeof s.kill === 'number' ? (sg.below ? '아래' : '위') : '없음') + '</b></div>' +
+        '<div>오늘 (≤−5)<b class="mono"' + (sg.hitD ? ' style="color:var(--bad)"' : '') + '>' + dp(sg.daily) + '</b></div>' +
+        '<div>20거래일 (≤−10)<b class="mono"' + (sg.hit20 ? ' style="color:var(--bad)"' : '') + '>' + dp(sg.d20) + '</b></div></div>' +
+        (sg.r.from ? '<div class="src">20거래일: ' + esc(sg.r.from) + ' → ' + esc(sg.r.asof) + ' 종가 · 종목 ' + pct(sg.r.ret20) + ' / ' + sg.bname + ' ' + pct(sg.r.bench20) + ' (Yahoo 일봉)</div>' : '<div class="src">20거래일 이력 수집 전</div>') +
         '<div class="verdict ' + (sg.on ? 'v-bad' : sg.below ? 'v-warn' : 'v-ok') + '">' +
         (sg.on ? '신호 켜짐 — 48시간 안에 가설을 최신 자료로 다시 판정하고 결정을 기록' :
-         sg.below ? '손절선 아래지만 시장 대비 −5%p 이내 — 시장 탓, 신호 꺼짐' :
+         sg.below ? '손절선 아래지만 시장 대비 기준 미달 — 시장 탓, 신호 꺼짐' :
          (typeof s.kill === 'number' ? '손절선 위 — 신호 꺼짐' : '주가 손절선 없음 — 신호 해당 없음')) + '</div></section>';
     }
 
@@ -286,9 +292,10 @@
   var bust = '?t=' + Date.now();
   Promise.all([
     fetch('./hypotheses.json' + bust).then(function(r){ if (!r.ok) throw new Error('hypotheses.json ' + r.status); return r.json(); }),
-    fetch('./price.json' + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+    fetch('./price.json' + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    fetch('./history.json' + bust).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
   ]).then(function(res){
-    H = res[0]; P = res[1];
+    H = res[0]; P = res[1]; HS = res[2];
     var want = (location.hash || '').replace('#', '');
     cur = H.stocks.some(function(s){ return s.code === want; }) ? want : H.stocks[0].code;
     document.getElementById('stamp').innerHTML = '가설 기준 ' + esc(H.updated) + '<br>' + (P ? '시세 ' + kst(P.domestic_updated_at || P.updated_at) : '시세 불러오기 실패');
