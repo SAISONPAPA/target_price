@@ -1,67 +1,67 @@
 {
-  "updated_at": "2026-10-23T04:40:33.243366+00:00",
+  "updated_at": "2026-10-23T09:59:40.470272+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
-      "price": 1250000,
-      "change": 27000,
-      "change_rate": 2.21,
+      "price": 1277000,
+      "change": 54000,
+      "change_rate": 4.42,
       "src": "yahoo"
     },
     "003230": {
       "name": "삼양식품",
-      "price": 1228000,
-      "change": 2000,
-      "change_rate": 0.16,
+      "price": 1225000,
+      "change": -1000,
+      "change_rate": -0.08,
       "src": "yahoo"
     },
     "010120": {
       "name": "LS ELECTRIC",
-      "price": 151200,
-      "change": -9200,
-      "change_rate": -5.74,
+      "price": 156900,
+      "change": -3500,
+      "change_rate": -2.18,
       "src": "yahoo"
     },
     "071050": {
       "name": "한국금융지주",
-      "price": 143800,
-      "change": -3100,
-      "change_rate": -2.11,
+      "price": 145200,
+      "change": -1700,
+      "change_rate": -1.16,
       "src": "yahoo"
     },
     "316140": {
       "name": "우리금융지주",
-      "price": 29700,
-      "change": -1500,
-      "change_rate": -4.81,
+      "price": 30100,
+      "change": -1100,
+      "change_rate": -3.53,
       "src": "yahoo"
     },
     "005930": {
       "name": "삼성전자",
-      "price": 213000,
-      "change": -2000,
-      "change_rate": -0.93,
+      "price": 215500,
+      "change": 500,
+      "change_rate": 0.23,
       "src": "yahoo"
     },
     "360750": {
       "name": "TIGER 미국S&P500",
-      "price": 25185,
-      "change": -115,
-      "change_rate": -0.45,
+      "price": 25205,
+      "change": -95,
+      "change_rate": -0.38,
       "src": "yahoo"
     },
     "418660": {
       "name": "TIGER 미국나스닥100레버리지",
-      "price": 35230,
-      "change": -930,
-      "change_rate": -2.57,
+      "price": 35405,
+      "change": -755,
+      "change_rate": -2.09,
       "src": "yahoo"
     },
     "133690": {
       "name": "TIGER 미국나스닥100",
-      "price": 169955,
-      "change": -2130,
-      "change_rate": -1.24,
+      "price": 170375,
+      "change": -1710,
+      "change_rate": -0.99,
       "src": "yahoo"
     },
     "003490": {
@@ -80,38 +80,38 @@
     },
     "GOOGL": {
       "price": 324.22,
-      "change": -8.88,
-      "change_rate": -2.67,
+      "change": -0.07,
+      "change_rate": -0.02,
       "currency": "USD"
     },
     "UBER": {
       "price": 69.07,
-      "change": 1.45,
-      "change_rate": 2.14,
+      "change": 0.22,
+      "change_rate": 0.32,
       "currency": "USD"
     },
     "MSFT": {
       "price": 521.08,
-      "change": -8.94,
-      "change_rate": -1.69,
+      "change": -0.92,
+      "change_rate": -0.18,
       "currency": "USD"
     },
     "BRK.B": {
       "price": 546.97,
-      "change": 7.13,
-      "change_rate": 1.32,
+      "change": -1.23,
+      "change_rate": -0.22,
       "currency": "USD"
     },
     "XOM": {
       "price": 178.23,
-      "change": -0.27,
-      "change_rate": -0.15,
+      "change": -0.45,
+      "change_rate": -0.25,
       "currency": "USD"
     },
     "DRAM": {
       "price": 45.68,
-      "change": -2.58,
-      "change_rate": -5.35,
+      "change": 0.69,
+      "change_rate": 1.53,
       "currency": "USD"
     },
     "086450": {
@@ -123,23 +123,23 @@
     },
     "483650": {
       "name": "달바글로벌",
-      "price": 155300,
-      "change": -8500,
-      "change_rate": -5.19,
+      "price": 151600,
+      "change": -12200,
+      "change_rate": -7.45,
       "src": "yahoo"
     }
   },
   "indices": {
     "KOSPI": {
-      "price": 5477.9,
-      "change": -53.47,
-      "change_rate": -0.97,
+      "price": 5550.3,
+      "change": 18.93,
+      "change_rate": 0.34,
       "src": "yahoo"
     },
     "KOSDAQ": {
-      "price": 744.29,
-      "change": -19.93,
-      "change_rate": -2.61,
+      "price": 751.69,
+      "change": -12.53,
+      "change_rate": -1.64,
       "src": "yahoo"
     },
     "SPX": {
@@ -158,17 +158,17 @@
       "change_rate": 0.03
     },
     "VIX": {
-      "price": 19.03,
-      "change": 2.35,
-      "change_rate": 14.09
+      "price": 19.57,
+      "change": 0.53,
+      "change_rate": 2.78
     },
     "FEAR_GREED": {
-      "score": 19.8,
+      "score": 20.5,
       "rating": "extreme fear",
       "previous_close": 19.8,
       "previous_1_week": 22.1,
-      "timestamp": "2026-10-23T00:00:00+00:00"
+      "timestamp": "2026-10-23T09:43:31+00:00"
     }
   },
-  "domestic_updated_at": "2026-10-23T04:40:29.483158+00:00"
+  "domestic_updated_at": "2026-10-23T09:59:36.950413+00:00"
 }
