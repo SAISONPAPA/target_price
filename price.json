@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-23T09:59:40.470272+00:00",
+  "updated_at": "2026-10-23T11:59:35.800673+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -158,17 +158,17 @@
       "change_rate": 0.03
     },
     "VIX": {
-      "price": 19.57,
-      "change": 0.53,
-      "change_rate": 2.78
+      "price": 19.56,
+      "change": 0.52,
+      "change_rate": 2.73
     },
     "FEAR_GREED": {
-      "score": 20.5,
-      "rating": "extreme fear",
+      "score": 26.8,
+      "rating": "fear",
       "previous_close": 19.8,
       "previous_1_week": 22.1,
-      "timestamp": "2026-10-23T09:43:31+00:00"
+      "timestamp": "2026-10-23T11:43:38+00:00"
     }
   },
-  "domestic_updated_at": "2026-10-23T09:59:36.950413+00:00"
+  "domestic_updated_at": "2026-10-23T11:59:31.616889+00:00"
 }
