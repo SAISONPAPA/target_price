@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-30",
+  "updated": "2026-11-05",
   "killCount": 3,
   "stocks": [
     {
@@ -1423,25 +1423,27 @@
       "items": [
         {
           "id": "u-3q",
-          "status": "pending",
+          "status": "ok",
           "gate": true,
           "due": "2026-11-04",
           "when": "11/4",
           "title": "3Q 총거래액 $58.25B 이상 & 조정 EPS $0.84 이상 (가이던스 하단)",
           "rule": "둘 중 하나라도 가이던스 하단 미달이면 붕괴",
-          "src": "2Q 실적 발표 (SEC 8-K 8/5) · EPS 컨센서스 $0.97",
-          "dateKind": "confirmed"
+          "src": "2Q 실적 발표 (SEC 8-K 8/5) · EPS 컨센서스 $0.97 · 3Q 실적 발표 (Uber IR 11/4)",
+          "dateKind": "confirmed",
+          "result": "총거래액 $59.819B (+20%, 환율 제외 +20%), 조정 EPS $0.88 — 두 기준 모두 충족. 조정 EBITDA $2.963B (총거래액 대비 5.0%)"
         },
         {
           "id": "u-4qguide",
-          "status": "pending",
+          "status": "ok",
           "gate": true,
           "due": "2026-11-04",
           "when": "11/4",
           "title": "4Q 총거래액 가이던스 성장률 17% 이상 (환율 제외)",
           "rule": "15% 미만이면 붕괴 (성장 둔화 확인)",
-          "src": "3Q 가이던스 18~22%",
-          "dateKind": "confirmed"
+          "src": "3Q 가이던스 18~22% · 3Q 실적 발표 4Q 가이던스 (Uber IR 11/4)",
+          "dateKind": "confirmed",
+          "result": "4Q 총거래액 가이던스 $63.25~65.25B, 환율 제외 +18~22% — 17% 기준 충족. 단 4Q EPS 가이던스 $0.95~0.99는 컨센서스($1.06, TipRanks) 하회"
         },
         {
           "id": "u-fcf",
@@ -1603,7 +1605,7 @@
             "verdict": "pending",
             "red": null,
             "green": "총거래액 대비 Adjusted EBITDA 비율 5% 이상 도달",
-            "basis": "1Q26 4.6% → 2Q26 약 4.9%"
+            "basis": "1Q26 4.6% → 2Q26 약 4.9% → 3Q26 5.0% (Uber IR 11/4) — 검증 트리거 문구에는 도달했으나 가설 본문이 4Q 기준이라 4Q 실적 후 확정"
           },
           {
             "theme": "긱워커 규제",
