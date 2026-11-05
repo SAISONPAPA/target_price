@@ -258,7 +258,7 @@
     <button class="tab active" role="tab" data-tab="domestic">국내</button>
     <button class="tab" role="tab" data-tab="overseas">해외</button>
     <button class="tab" role="tab" data-tab="schedule">일정</button>
-    <button class="tab" role="tab" data-tab="dca">적립비교</button>
+    <button class="tab" role="tab" data-tab="etf">ETF</button>
     <button class="tab" role="tab" data-tab="closed">매도완료</button>
   </nav>
 
@@ -301,7 +301,9 @@
     <div id="board-overseas"></div>
   </section>
 
-  <section class="panel" data-panel="dca">
+  <section class="panel" data-panel="etf">
+    <div id="board-etf"></div>
+    <div class="group-h"><span>적립식 · 나스닥100 1배 vs 2배</span><span id="dcaCount"></span></div>
     <div class="box"><div class="cmp" id="dcaCompare">계산 중…</div></div>
     <div class="box">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
@@ -1126,8 +1128,10 @@ document.addEventListener('click', e => {
 function renderAllBoards(){
   const openCodes = new Set(Array.from(document.querySelectorAll('details.card[open]')).map(d => d.dataset.code || d.dataset.dcaCode).filter(Boolean));
   renderSummary();
-  renderBoardInto('board-domestic', ['국내주식','국내ETF'], sortState.domestic);
-  renderBoardInto('board-overseas', ['해외주식','해외ETF'], sortState.overseas);
+  renderBoardInto('board-domestic', ['국내주식'], sortState.domestic);
+  renderBoardInto('board-overseas', ['해외주식'], sortState.overseas);
+  renderBoardInto('board-etf', ['국내ETF','해외ETF'], 'default');
+  const dc = document.getElementById('dcaCount'); if (dc) dc.textContent = DCA_PLANS.length + '종목';
   renderDcaBoard();
   renderClosedBoard();
   renderSchedule();
@@ -1139,7 +1143,7 @@ function renderAllBoards(){
 function activateTab(name){
   document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === name; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
-  if (name === 'dca') requestAnimationFrame(() => { if (dcaChartInstance) dcaChartInstance.resize(); });
+  if (name === 'etf') requestAnimationFrame(() => { if (dcaChartInstance) dcaChartInstance.resize(); });
 }
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
 
@@ -1164,7 +1168,7 @@ document.addEventListener('click', e => {
   if (go){
     const stock = STOCKS.find(s => s.code === go.dataset.goto);
     if (!stock) return;
-    activateTab(stock.category.startsWith('해외') ? 'overseas' : 'domestic');
+    activateTab(stock.category.endsWith('ETF') ? 'etf' : stock.category.startsWith('해외') ? 'overseas' : 'domestic');
     const card = document.getElementById('card-' + stock.code);
     if (card){ card.open = true; card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     return;
