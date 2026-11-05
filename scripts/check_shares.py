@@ -50,6 +50,17 @@ def naver(code):
                 out["pbr"], out["bps"] = parts[0], parts[1]
         if t.startswith("액면가"):
             out["par"] = v
+    txt = soup.get_text(" ", strip=True)
+    if "listed" not in out:
+        m = re.search(r"상장주식수\s*([\d,]+)", txt)
+        out["listed"] = num(m.group(1)) if m else None
+    if "bps" not in out:
+        m = re.search(r"PBR\s*l?\s*BPS[^\d]*([\d.,]+)\s*배\s*l?\s*([\d,]+)\s*원", txt)
+        if m:
+            out["pbr"], out["bps"] = num(m.group(1)), num(m.group(2))
+    if "listed" not in out or out.get("listed") is None or "bps" not in out:
+        i = txt.find("상장주식수"); j = txt.find("BPS")
+        print("  [debug]", r.status_code, len(r.text), txt[i:i+60] if i >= 0 else "상장주식수 없음", "|", txt[j-40:j+60] if j >= 0 else "BPS 없음")
     pr = soup.select_one("p.no_today .blind")
     out["price"] = num(pr.get_text()) if pr else None
     return out
