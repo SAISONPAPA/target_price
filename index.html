@@ -148,6 +148,7 @@
   .tpline{ position:relative; height:6px; border-radius:999px; background:var(--surface-2); margin:28px 6px 40px; }
   .tpline .fill{ position:absolute; left:0; top:0; bottom:0; border-radius:999px; background:var(--accent); opacity:.55; }
   .tpline .m{ position:absolute; top:-5px; width:2px; height:16px; background:var(--faint); }
+  .tpline .m.low span{ top:50px; }
   .tpline .m span{ position:absolute; top:20px; left:50%; transform:translateX(-50%); font-size:11.5px; color:var(--muted); white-space:nowrap; text-align:center; line-height:1.25; }
   .tpline .m.tp{ background:var(--accent); } .tpline .m.tp span{ color:var(--accent); font-weight:700; }
   .tpline .now{ position:absolute; top:-6px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:var(--fg); border:3px solid var(--surface); }
@@ -333,10 +334,6 @@ const STOCKS = [
     sellNote:'240만원 도달 시 50% 매도, 320만원 도달 시 나머지 50% 매도',
     reportLink:'reports/hynix-000660.pdf',
     hypoLink:'hypothesis.html#000660' },
-  { code:'010120', name:'LS ELECTRIC', category:'국내주식', held:true, currency:'KRW',
-    entry:238100, finalTP:250000, bullTP:413166, baseTP:301835, bearTP:203552,
-    sellNote:'25만원 도달 시 전량 매도',
-    hypoLink:'hypothesis.html#010120' },
   { code:'071050', name:'한국금융지주', category:'국내주식', held:true, currency:'KRW',
     entry:234857, finalTP:400000, bullTP:906421, baseTP:855277, bearTP:797119, stressedTP:736431, superBullTP:956439,
     sellNote:'30만원 도달 시 50% 매도, 40만원 도달 시 나머지 50% 매도',
@@ -394,6 +391,11 @@ const CLOSED = [
     entry:228.79, exit:381, exitDate:'2026-08-03',
     finalTP:380, bullTP:463, baseTP:320, bearTP:263,
     note:'목표가 380달러 달성. 지난번에도 달성했었고 390달러까지 갔지만 팔지 못했음. 상승할 수도 있다는 생각은 들지만, 여전히 지속적인 CAPEX와 줄어드는 FCF, 그리고 AI 세계에서 밀려나는 Gemini까지 불편한 점도 있다는 건 부정할 수 없는 사실. 클라우드와 광고 수익은 계속 늘어나지만 CAPEX가 더 늘어나는 게 무서운 듯함. 여전히 좋은 주식이라 생각하지만, 매수할 자리는 아니고 매도가 가까운 듯. Good bye.' },
+  { code:'010120', name:'LS ELECTRIC', category:'국내주식', currency:'KRW',
+    entry:238100, exit:134497, exitDate:'2026-11-05',
+    finalTP:250000, bullTP:413166, baseTP:301835, bearTP:203552,
+    hypoLink:'hypothesis.html#010120',
+    note:'주식수를 애초에 잘못 계산함. 액면분할 하면서 기존 주식수 대비 5배가 늘어났는데, 이 점을 반영하지 못함. 이 점을 반영했다면 적정 주가는 6~7만원대임. 하지만 더 아쉬운 건, 내가 이 점을 몇 달 전에 알았다는 거임. 그런데도 불구하고 증권사의 리포트라든가 내가 선택한 결정을 쉽게 돌리지 못했음. 나름 규칙을 잘 지키려고 해야 했는데, 애초에 계산이 틀린 것부터가 실패였음. 수업료 미쳤다.' },
   { code:'003230', name:'삼양식품', category:'국내주식', currency:'KRW',
     entry:1090000, exit:1340000, exitDate:'2026-08-18',
     finalTP:1400000, bullTP:2328888, baseTP:1754923, bearTP:1353975,
@@ -747,8 +749,11 @@ function renderClosedCard(stock){
     if (stock.finalTP != null) points.push(stock.finalTP);
     const min = Math.min(...points), max = Math.max(...points), range = (max - min) || 1;
     const p = v => Math.max(0, Math.min(100, ((v - min) / range) * 100));
-    const mk = (v, k, extra) => { const L = p(v); const edge = L < 12 ? ' edge-l' : L > 88 ? ' edge-r' : ''; return `<div class="m${extra||''}${edge}" style="left:${L}%"><span>${k}<br>${short(v, stock.currency)}</span></div>`; };
-    lineHTML = `<div><div class="sec-t">매도 위치</div><div class="tpline">
+    const placed = [];
+    const mk = (v, k, extra) => { const L = p(v); const edge = L < 12 ? ' edge-l' : L > 88 ? ' edge-r' : '';
+      const low = placed.some(x => Math.abs(x - L) < 11) ? ' low' : ''; if (!low) placed.push(L);
+      return `<div class="m${extra||''}${edge}${low}" style="left:${L}%"><span>${k}<br>${short(v, stock.currency)}</span></div>`; };
+    lineHTML = `<div><div class="sec-t">매도 위치</div><div class="tpline" style="margin-bottom:62px">
       <div class="fill" style="width:${p(stock.exit)}%"></div>
       ${mk(stock.entry,'매입가')}${mk(stock.bearTP,'BEAR')}${mk(stock.baseTP,'BASE')}${mk(stock.bullTP,'BULL')}
       ${stock.finalTP != null ? mk(stock.finalTP,'최종 TP',' tp') : ''}
@@ -1008,7 +1013,7 @@ const KIND_LABEL = { confirmed:'확정일', expected:'예상일', deadline:'기�
 function scheduleEvents(){
   const ev = [];
   if (!HYPO || !HYPO.stocks) return ev;
-  HYPO.stocks.forEach(s => s.items.filter(i => !(i.kind === 'price' && i.due.startsWith('9999'))).forEach(i => ev.push({ s, i, due: i.due, kind: i.dateKind || 'expected' })));
+  HYPO.stocks.filter(s => !s.closed).forEach(s => s.items.filter(i => !(i.kind === 'price' && i.due.startsWith('9999'))).forEach(i => ev.push({ s, i, due: i.due, kind: i.dateKind || 'expected' })));
   return ev;
 }
 function evHTML(e){

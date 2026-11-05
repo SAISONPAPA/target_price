@@ -167,7 +167,8 @@
   function pct(v){ return (v > 0 ? '+' : '') + v.toFixed(1) + '%'; }
 
   function renderTabs(){
-    document.getElementById('tabs').innerHTML = H.stocks.map(function(s){
+    document.getElementById('tabs').innerHTML = H.stocks.slice().sort(function(a, c){ return (a.closed ? 1 : 0) - (c.closed ? 1 : 0); }).map(function(s){
+      if (s.closed) return '<button class="tab' + (s.code === cur ? ' active' : '') + '" data-code="' + s.code + '" style="opacity:.6">' + esc(s.name) + '<span class="cnt">매도</span></button>';
       var KK = s.killCount || H.killCount, b = brokenOf(s), sg = sigOf(s), hot = b >= KK - 1 || (sg && sg.on);
       return '<button class="tab' + (s.code === cur ? ' active' : '') + '" data-code="' + s.code + '">' + esc(s.name) +
         '<span class="cnt' + (hot ? ' hot' : '') + '">' + b + '/' + KK + (sg && sg.on ? ' ⚠' : '') + '</span></button>';
@@ -194,7 +195,8 @@
       '여유 ' + left + '칸 · 계속 보유 가능';
     if (gateBad >= 2) vt += ' · 핵심 가설 2개 붕괴, 즉시 재검토';
 
-    var html = '', cr = crashDay(), sg = sigOf(s);
+    var html = '', cr = crashDay(), sg = s.closed ? null : sigOf(s);
+    if (s.closed) html += '<div class="alert">' + esc(s.closed.date) + ' 전량 매도 (' + s.closed.returnPct + '%) — 아래 가설은 매도 시점 기록으로 보존<br><span style="font-weight:500">' + esc(s.closed.decision) + '</span></div>';
     if (cr) html += '<div class="alert">⚠ 급락일: 코스피 ' + cr.change_rate + '% — 매도 판단은 3거래일 뒤로 보류 (규칙 ③)</div>';
     html += '<section class="panel"><div class="ptitle"><span>매도까지</span><span>판정 끝 ' + done.length + ' · 남은 판정 ' + pending.length + '</span></div>' +
       '<div class="g-head"><div class="g-big">' + b + ' <small>/ ' + K + ' 붕괴</small></div></div>' +
