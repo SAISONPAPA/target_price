@@ -32,6 +32,19 @@ def num(s):
 
 
 def naver(code):
+    """네이버 모바일 API (데스크톱 페이지는 봇에 다른 페이지를 돌려줌)"""
+    j = requests.get(f"https://m.stock.naver.com/api/stock/{code}/integration", headers=H, timeout=15).json()
+    info = {x.get("code"): x.get("value") for x in j.get("totalInfos", [])}
+    out = {"pbr": num(info.get("pbr")), "bps": num(info.get("bps")), "price": num(info.get("lastClosePrice")), "par": None}
+    mv = info.get("marketValue") or ""
+    jo = re.search(r"([\d,]+)조", mv); ok = re.search(r"([\d,]+)억", mv)
+    cap = (num(jo.group(1)) if jo else 0) * 1e12 + (num(ok.group(1)) if ok else 0) * 1e8
+    out["listed"] = cap / out["price"] if cap and out["price"] else None
+    out["keys"] = sorted(info.keys())
+    return out
+
+
+def naver_old(code):
     r = requests.get(f"https://finance.naver.com/item/main.naver?code={code}", headers=H, timeout=15)
     r.encoding = "euc-kr"
     soup = BeautifulSoup(r.text, "html.parser")
@@ -87,7 +100,7 @@ def main():
         except Exception as e:  # noqa: BLE001
             print(f"{name}({code}) 실패: {e}")
             continue
-        row(name, code, rs, req, n.get("listed"), n.get("bps"), n.get("price"), f"| 액면가 {n.get('par')} | PBR {n.get('pbr')}")
+        row(name, code, rs, req, n.get("listed"), n.get("bps"), n.get("price"), f"| PBR {n.get('pbr')} | (시장주식수=시가총액/종가 추정)")
     print("== 미국 (Yahoo) ==")
     try:
         import yfinance as yf

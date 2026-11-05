@@ -15,6 +15,7 @@ import requests
 TICKERS = {
     "GOOGL": "GOOGL",
     "UBER": "UBER",
+    "QQQ": "QQQ",
     "MSFT": "MSFT",
     "BRK.B": "BRK-B",
     "XOM": "XOM",
