@@ -20,6 +20,7 @@ TICKERS = {
     "BRK.B": "BRK-B",
     "XOM": "XOM",
     "DRAM": "DRAM",
+    "SCHD": "SCHD",
 }
 
 # 미국 3대 지수
@@ -28,6 +29,8 @@ INDEX_TICKERS = {
     "NASDAQ": "^IXIC",  # 나스닥 종합지수
     "DJI": "^DJI",      # 다우존스 산업평균
     "VIX": "^VIX",      # CBOE 변동성지수(공포지수)
+    "NDX": "^NDX",      # 나스닥100 (QQQ 기초지수) — 탄약 투입 기준
+    "USDKRW": "KRW=X",  # 원/달러 환율
 }
 
 PRICE_JSON = "price.json"
@@ -93,6 +96,24 @@ def main():
             print(f"[경고] 지수 {label}({yf_ticker}) 조회 실패: {e}")
             continue
         data["indices"][label] = result
+
+    # 나스닥100 사상 최고 종가와 고점 대비 낙폭 (자산배분 탄약 규칙)
+    try:
+        h = yf.Ticker("^NDX").history(period="max", interval="1d", auto_adjust=False)["Close"].dropna()
+        ath_date = h.idxmax()
+        ath = float(h.max())
+        last_close = float(h.iloc[-1])
+        cur = data["indices"].get("NDX", {}).get("price", last_close)
+        data["indices"].setdefault("NDX", {}).update({
+            "ath": round(ath, 2),
+            "ath_date": ath_date.strftime("%Y-%m-%d"),
+            "last_close": round(last_close, 2),
+            "last_close_date": h.index[-1].strftime("%Y-%m-%d"),
+            "drawdown": round((cur / ath - 1) * 100, 2),
+            "drawdown_close": round((last_close / ath - 1) * 100, 2),
+        })
+    except Exception as e:
+        print(f"[경고] NDX 고점 계산 실패: {e}")
 
     try:
         data["indices"]["FEAR_GREED"] = fetch_fear_greed()

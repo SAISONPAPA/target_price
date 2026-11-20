@@ -1,0 +1,106 @@
+{
+  "updated": "2026-11-20",
+  "targetTotal": 18000000,
+  "note": "코어 자산배분 (지수 위주). 금액은 사용자가 알려준 원화 평가액 스냅샷 — 바뀌면 이 파일의 current만 고치면 됨.",
+  "sleeves": [
+    {
+      "key": "sp500",
+      "role": "미드필더",
+      "icon": "⚽",
+      "name": "TIGER 미국S&P500",
+      "account": "ISA",
+      "target": 6300000,
+      "current": 1021000,
+      "pending": {
+        "amount": 4000000,
+        "text": "CMA 보유분 약 400만원 ISA로 이전 중"
+      }
+    },
+    {
+      "key": "ndx",
+      "role": "공격수",
+      "icon": "⚔",
+      "name": "TIGER 미국나스닥100",
+      "account": "ISA",
+      "target": 4500000,
+      "current": 2078000
+    },
+    {
+      "key": "schd",
+      "role": "수비수",
+      "icon": "🛡",
+      "name": "SCHD",
+      "account": "CMA",
+      "target": 4500000,
+      "current": 1497000
+    },
+    {
+      "key": "brk",
+      "role": "수비수",
+      "icon": "🛡",
+      "name": "BRK.B",
+      "account": "CMA",
+      "target": 900000,
+      "current": 1571000,
+      "hold": "목표 초과지만 매도 없이 유지 — 신규 자금은 넣지 않음"
+    },
+    {
+      "key": "cash",
+      "role": "탄약",
+      "icon": "💵",
+      "name": "달러 현금",
+      "account": "CMA",
+      "target": 1800000,
+      "usd": 4274.6,
+      "usdNote": "예수금 $5,393 − 11/18 SCHD 매수 $1,118.4"
+    }
+  ],
+  "excluded": [
+    {
+      "name": "QQQ 2주 (탄약 1차 투입)",
+      "why": "하락장 예외 매수 — ^NDX 고점 회복 시 전량 매도"
+    },
+    {
+      "name": "TIGER 미국나스닥100레버리지 적립",
+      "why": "5년 프로젝트로 별도 관리"
+    },
+    {
+      "name": "개별주 (UBER·하이닉스·DRAM 등)",
+      "why": "전환 중 — 가설·목표가 규칙대로 정리되면 코어로 이동"
+    }
+  ],
+  "ammo": {
+    "index": "NDX",
+    "indexName": "나스닥100 (^NDX)",
+    "basis": "사상 최고 종가",
+    "steps": [
+      {
+        "dd": -10,
+        "part": "1/3"
+      },
+      {
+        "dd": -20,
+        "part": "1/3"
+      },
+      {
+        "dd": -30,
+        "part": "남은 전부"
+      }
+    ],
+    "buy": "QQQ 또는 QQQM",
+    "used": [
+      {
+        "step": 1,
+        "date": "2026-11-05",
+        "what": "QQQ 2주 @ $683"
+      }
+    ],
+    "exit": "^NDX가 최고 종가를 회복하면 탄약으로 산 QQQ 전량 매도 → 원금은 달러 현금으로 재충전, 수익은 SCHD 매수"
+  },
+  "rules": [
+    "새 돈은 목표 대비 가장 모자란 칸부터 채운다 (BRK.B 제외)",
+    "개별주가 규칙대로 정리되면 그 돈도 가장 모자란 칸으로",
+    "탄약: ^NDX 최고 종가 대비 −10%·−20%에 1/3씩, −30%에 남은 전부 QQQ/QQQM",
+    "^NDX 최고 종가 회복 시 탄약 QQQ 전량 매도 — 원금은 현금, 수익은 SCHD"
+  ]
+}
