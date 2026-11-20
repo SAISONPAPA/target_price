@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   fetch:
@@ -16,8 +16,14 @@ jobs:
           python-version: "3.11"
       - run: pip install yfinance
       - run: python scripts/fetch_sim_data.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sim-prices
-          path: sim_prices.json
-          retention-days: 7
+      - name: Push to sim-data branch (not main)
+        run: |
+          mkdir -p /tmp/out && mv sim_prices.json /tmp/out/
+          git config user.name "price-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan sim-data
+          git rm -rq --cached . && rm -rf ./* .github 2>/dev/null || true
+          cp /tmp/out/sim_prices.json .
+          git add sim_prices.json
+          git commit -qm "sim data $(date -u +%F)"
+          git push -f origin sim-data
