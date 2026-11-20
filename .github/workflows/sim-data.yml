@@ -1,0 +1,23 @@
+name: Simulation data (manual)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install yfinance
+      - run: python scripts/fetch_sim_data.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-prices
+          path: sim_prices.json
+          retention-days: 7
