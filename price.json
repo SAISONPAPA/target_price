@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-23T07:26:16.407789+00:00",
+  "updated_at": "2026-11-23T18:41:51.674006+00:00",
   "stocks": {
     "000660": {
       "name": "SK하이닉스",
@@ -79,39 +79,39 @@
       "src": "yahoo"
     },
     "GOOGL": {
-      "price": 265.29,
-      "change": -8.42,
-      "change_rate": -3.08,
+      "price": 283.36,
+      "change": 12.63,
+      "change_rate": 4.67,
       "currency": "USD"
     },
     "UBER": {
-      "price": 63.47,
-      "change": -2.09,
-      "change_rate": -3.19,
+      "price": 64.66,
+      "change": 0.16,
+      "change_rate": 0.25,
       "currency": "USD"
     },
     "MSFT": {
-      "price": 484.52,
-      "change": -12.82,
-      "change_rate": -2.58,
+      "price": 496.29,
+      "change": 8.63,
+      "change_rate": 1.77,
       "currency": "USD"
     },
     "BRK.B": {
-      "price": 570.0,
-      "change": -1.72,
-      "change_rate": -0.3,
+      "price": 572.32,
+      "change": 2.23,
+      "change_rate": 0.39,
       "currency": "USD"
     },
     "XOM": {
-      "price": 159.99,
-      "change": 1.11,
-      "change_rate": 0.7,
+      "price": 158.13,
+      "change": -2.22,
+      "change_rate": -1.39,
       "currency": "USD"
     },
     "DRAM": {
-      "price": 33.36,
-      "change": -4.68,
-      "change_rate": -12.31,
+      "price": 39.51,
+      "change": 5.18,
+      "change_rate": 15.09,
       "currency": "USD"
     },
     "086450": {
@@ -129,15 +129,15 @@
       "src": "yahoo"
     },
     "QQQ": {
-      "price": 608.45,
-      "change": -35.06,
-      "change_rate": -5.45,
+      "price": 649.85,
+      "change": 33.3,
+      "change_rate": 5.4,
       "currency": "USD"
     },
     "SCHD": {
-      "price": 33.94,
-      "change": -0.22,
-      "change_rate": -0.64,
+      "price": 34.35,
+      "change": 0.27,
+      "change_rate": 0.78,
       "currency": "USD"
     }
   },
@@ -155,48 +155,48 @@
       "src": "yahoo"
     },
     "SPX": {
-      "price": 6910.39,
-      "change": -267.17,
-      "change_rate": -3.72
+      "price": 7236.84,
+      "change": 318.39,
+      "change_rate": 4.6
     },
     "NASDAQ": {
-      "price": 22617.73,
-      "change": -1264.37,
-      "change_rate": -5.29
+      "price": 24092.49,
+      "change": 1440.97,
+      "change_rate": 6.36
     },
     "DJI": {
-      "price": 48147.33,
-      "change": -965.3,
-      "change_rate": -1.97
+      "price": 49625.95,
+      "change": 1441.26,
+      "change_rate": 2.99
     },
     "VIX": {
-      "price": 35.89,
-      "change": 7.33,
-      "change_rate": 25.67
+      "price": 26.25,
+      "change": -9.64,
+      "change_rate": -26.86
     },
     "FEAR_GREED": {
-      "score": 9.7,
+      "score": 18.4,
       "rating": "extreme fear",
-      "previous_close": 18.7,
-      "previous_1_week": 37.4,
-      "timestamp": "2026-11-20T23:59:52+00:00"
+      "previous_close": 9.7,
+      "previous_1_week": 31.1,
+      "timestamp": "2026-11-23T18:34:46+00:00"
     },
     "NDX": {
-      "price": 25028.98,
-      "change": -1494.46,
-      "change_rate": -5.63,
+      "price": 26701.82,
+      "change": 1636.42,
+      "change_rate": 6.53,
       "ath": 31224.47,
       "ath_date": "2026-10-06",
-      "last_close": 25028.98,
-      "last_close_date": "2026-11-20",
-      "drawdown": -19.84,
-      "drawdown_close": -19.84
+      "last_close": 26701.82,
+      "last_close_date": "2026-11-23",
+      "drawdown": -14.48,
+      "drawdown_close": -14.48
     },
     "USDKRW": {
-      "price": 1343.88,
-      "change": -2.25,
-      "change_rate": -0.17
+      "price": 1342.03,
+      "change": -4.1,
+      "change_rate": -0.3
     }
   },
-  "domestic_updated_at": "2026-11-23T07:26:11.582125+00:00"
+  "domestic_updated_at": "2026-11-23T18:41:46.034453+00:00"
 }
